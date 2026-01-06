@@ -249,7 +249,8 @@ public class Character extends AbstractCharacterObject {
     @Setter
     private long jailExpiration = -1;
     private transient int localstr, localdex, localluk, localint_, localmagic, localwatk;
-    private transient int equipmaxhp, equipmaxmp, equipstr, equipdex, equipluk, equipint_, equipmagic, equipwatk, localchairhp, localchairmp;
+    private transient int equipmaxhp, equipmaxmp, equipstr, equipdex, equipluk, equipint_, equipmagic, equipwatk,
+            localchairhp, localchairmp;
     private int localchairrate;
     @Getter
     private boolean hidden;
@@ -283,8 +284,10 @@ public class Character extends AbstractCharacterObject {
     @Getter
     @Setter
     private String search = null;
-    private final AtomicBoolean mapTransitioning = new AtomicBoolean(true);  // player client is currently trying to change maps or log in the game map //玩家客户端当前正在尝试更改地图或登录游戏地图
-    private final AtomicBoolean awayFromWorld = new AtomicBoolean(true);  // player is online, but on cash shop or mts
+    private final AtomicBoolean mapTransitioning = new AtomicBoolean(true); // player client is currently trying to
+                                                                            // change maps or log in the game map
+                                                                            // //玩家客户端当前正在尝试更改地图或登录游戏地图
+    private final AtomicBoolean awayFromWorld = new AtomicBoolean(true); // player is online, but on cash shop or mts
     private final AtomicInteger exp = new AtomicInteger();
     private final AtomicInteger gachaExp = new AtomicInteger();
     private final AtomicInteger meso = new AtomicInteger();
@@ -362,7 +365,9 @@ public class Character extends AbstractCharacterObject {
     private final EnumMap<BuffStat, BuffStatValueHolder> effects = new EnumMap<>(BuffStat.class);
     private final Map<BuffStat, Byte> buffEffectsCount = new LinkedHashMap<>();
     private final Map<Disease, Long> diseaseExpires = new LinkedHashMap<>();
-    private final Map<Integer, Map<BuffStat, BuffStatValueHolder>> buffEffects = new LinkedHashMap<>(); // non-overriding buffs thanks to Ronan
+    private final Map<Integer, Map<BuffStat, BuffStatValueHolder>> buffEffects = new LinkedHashMap<>(); // non-overriding
+                                                                                                        // buffs thanks
+                                                                                                        // to Ronan
     private final Map<Integer, Long> buffExpires = new LinkedHashMap<>();
     @Getter
     private final Map<Integer, KeyBinding> keymap = new LinkedHashMap<>();
@@ -387,7 +392,7 @@ public class Character extends AbstractCharacterObject {
     private ScheduledFuture<?> recoveryTask = null;
     private ScheduledFuture<?> extraRecoveryTask = null;
     private ScheduledFuture<?> chairRecoveryTask = null;
-    private ScheduledFuture<?> pendantOfSpirit = null; //1122017
+    private ScheduledFuture<?> pendantOfSpirit = null; // 1122017
     private ScheduledFuture<?> cpqSchedule = null;
 
     private ScheduledFuture<?> FamilyBuffTimer = null;
@@ -440,11 +445,11 @@ public class Character extends AbstractCharacterObject {
     @Setter
     private boolean loggedIn = false;
     @Getter
-    private boolean useCS;  //chaos scroll upon crafting item.
+    private boolean useCS; // chaos scroll upon crafting item.
     private long npcCd;
     private int newWarpMap = -1;
-    private boolean canWarpMap = true;  //only one "warp" must be used per call, and this will define the right one.
-    private int canWarpCounter = 0;     //counts how many times "inner warps" have been called.
+    private boolean canWarpMap = true; // only one "warp" must be used per call, and this will define the right one.
+    private int canWarpCounter = 0; // counts how many times "inner warps" have been called.
     private byte extraHpRec = 0, extraMpRec = 0;
     private short extraRecInterval;
     @Setter
@@ -459,7 +464,7 @@ public class Character extends AbstractCharacterObject {
     private long banishTime = 0;
     @Setter
     private long lastExpGainTime;
-    private boolean pendingNameChange; //only used to change name on logout, not to be relied upon elsewhere
+    private boolean pendingNameChange; // only used to change name on logout, not to be relied upon elsewhere
     @Getter
     @Setter
     private long loginTime;
@@ -472,17 +477,25 @@ public class Character extends AbstractCharacterObject {
     private boolean familyBuff = false;
     private boolean familyParty = false;
 
+    private AtomicBoolean petLootInProgress = new AtomicBoolean(false);
+
     // 获取 FamilyExp 的值
     @Getter
     private float familyExp = 1;
     @Getter
     private float familyDrop = 1;
-    private static final CharacterService characterService = ServerManager.getApplicationContext().getBean(CharacterService.class);
-    private static final NameChangeService nameChangeService = ServerManager.getApplicationContext().getBean(NameChangeService.class);
-    private static final WorldTransferService worldTransferService = ServerManager.getApplicationContext().getBean(WorldTransferService.class);
-    private static final AccountService accountService = ServerManager.getApplicationContext().getBean(AccountService.class);
-    private static final HpMpAlertService hpMpAlertService = ServerManager.getApplicationContext().getBean(HpMpAlertService.class);
-    private static final InventoryService inventoryService = ServerManager.getApplicationContext().getBean(InventoryService.class);
+    private static final CharacterService characterService = ServerManager.getApplicationContext()
+            .getBean(CharacterService.class);
+    private static final NameChangeService nameChangeService = ServerManager.getApplicationContext()
+            .getBean(NameChangeService.class);
+    private static final WorldTransferService worldTransferService = ServerManager.getApplicationContext()
+            .getBean(WorldTransferService.class);
+    private static final AccountService accountService = ServerManager.getApplicationContext()
+            .getBean(AccountService.class);
+    private static final HpMpAlertService hpMpAlertService = ServerManager.getApplicationContext()
+            .getBean(HpMpAlertService.class);
+    private static final InventoryService inventoryService = ServerManager.getApplicationContext()
+            .getBean(InventoryService.class);
 
     private Character() {
         super.setListener(new CharacterListener(this));
@@ -492,7 +505,7 @@ public class Character extends AbstractCharacterObject {
         savedLocations = new SavedLocation[SavedLocationType.values().length];
 
         for (InventoryType type : InventoryType.values()) {
-           short b = 24;
+            short b = 24;
             if (type == InventoryType.CASH) {
                 b = 192;
             }
@@ -548,7 +561,7 @@ public class Character extends AbstractCharacterObject {
             ret.keymap.put(selectedKey[i], new KeyBinding(selectedType[i], selectedAction[i]));
         }
 
-        //to fix the map 0 lol
+        // to fix the map 0 lol
         for (int i = 0; i < 5; i++) {
             ret.trockmaps.add(MapId.NONE);
         }
@@ -765,7 +778,8 @@ public class Character extends AbstractCharacterObject {
         int maxbasedamage;
         Item weapon_item = getInventory(InventoryType.EQUIPPED).getItem((short) -11);
         if (weapon_item != null) {
-            maxbasedamage = calculateMaxBaseDamage(watk, ItemInformationProvider.getInstance().getWeaponType(weapon_item.getItemId()));
+            maxbasedamage = calculateMaxBaseDamage(watk,
+                    ItemInformationProvider.getInstance().getWeaponType(weapon_item.getItemId()));
         } else {
             if (job.isA(Job.PIRATE) || job.isA(Job.THUNDERBREAKER1)) {
                 double weapMulti = 3;
@@ -830,7 +844,7 @@ public class Character extends AbstractCharacterObject {
 
     public void newClient(Client c) {
         this.loggedIn = true;
-        c.setAccountName(this.client.getAccountName());//No null's for accountName
+        c.setAccountName(this.client.getAccountName());// No null's for accountName
         this.setClient(c);
         this.map = c.getChannelServer().getMapFactory().getMap(getMapId());
         Portal portal = map.findClosestPlayerSpawnpoint(getPosition());
@@ -873,7 +887,8 @@ public class Character extends AbstractCharacterObject {
                 if (!login) {
                     getMap().broadcastNONGMMessage(this, PacketCreator.removePlayerFromMap(getId()), false);
                 }
-                List<Pair<BuffStat, Integer>> ldsstat = Collections.singletonList(new Pair<BuffStat, Integer>(BuffStat.DARKSIGHT, 0));
+                List<Pair<BuffStat, Integer>> ldsstat = Collections
+                        .singletonList(new Pair<BuffStat, Integer>(BuffStat.DARKSIGHT, 0));
                 getMap().broadcastGMMessage(this, PacketCreator.giveForeignBuff(id, ldsstat), false);
                 this.releaseControlledMonsters();
             }
@@ -942,7 +957,7 @@ public class Character extends AbstractCharacterObject {
         hasSandboxItem = true;
     }
 
-    public void removeSandboxItems() {  // sandbox idea thanks to Morty
+    public void removeSandboxItems() { // sandbox idea thanks to Morty
         if (!hasSandboxItem) {
             return;
         }
@@ -955,8 +970,10 @@ public class Character extends AbstractCharacterObject {
             try {
                 for (Item item : new ArrayList<>(inv.list())) {
                     if (InventoryManipulator.isSandboxItem(item)) {
-                        InventoryManipulator.removeFromSlot(client, invType, item.getPosition(), item.getQuantity(), false);
-                        dropMessage(5, "[" + ii.getName(item.getItemId()) + "] " + I18nUtil.getMessage("Character.removeSandboxItems.message1"));
+                        InventoryManipulator.removeFromSlot(client, invType, item.getPosition(), item.getQuantity(),
+                                false);
+                        dropMessage(5, "[" + ii.getName(item.getItemId()) + "] "
+                                + I18nUtil.getMessage("Character.removeSandboxItems.message1"));
                     }
                 }
             } finally {
@@ -972,7 +989,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void setMasteries(int jobId) {
-        int[] skills = new int[]{0, 0, 0, 0};
+        int[] skills = new int[] { 0, 0, 0, 0 };
         if (jobId == 112) {
             skills[0] = Hero.ACHILLES;
             skills[1] = Hero.MONSTER_MAGNET;
@@ -1051,13 +1068,14 @@ public class Character extends AbstractCharacterObject {
         for (Character chr : map.getAllPlayers()) {
             Client chrC = chr.getClient();
 
-            if (chrC != null) {     // propagate new job 3rd-person effects (FJ, Aran 1st strike, etc)
+            if (chrC != null) { // propagate new job 3rd-person effects (FJ, Aran 1st strike, etc)
                 this.sendDestroyData(chrC);
                 this.sendSpawnData(chrC);
             }
         }
 
-        // need to delay to ensure clientside has finished reloading character data     //需要延迟以确保客户端已完成重新加载角色数据
+        // need to delay to ensure clientside has finished reloading character data
+        // //需要延迟以确保客户端已完成重新加载角色数据
         TimerManager.getInstance().schedule(() -> {
             Character thisChr = Character.this;
             MapleMap map = thisChr.getMap();
@@ -1070,7 +1088,7 @@ public class Character extends AbstractCharacterObject {
 
     public synchronized void changeJob(Job newJob) {
         if (newJob == null) {
-            return;//the fuck you doing idiot!
+            return;// the fuck you doing idiot!
         }
 
         if (canRecvPartySearchInvite && getParty() == null) {
@@ -1098,7 +1116,8 @@ public class Character extends AbstractCharacterObject {
             gainSp(spGain, GameConstants.getSkillBook(newJob.getId()), true);
         }
 
-        // thanks xinyifly for finding out missing AP awards (AP Reset can be used as a compass)
+        // thanks xinyifly for finding out missing AP awards (AP Reset can be used as a
+        // compass)
         if (newJob.getId() % 100 >= 1) {
             if (this.isCygnus()) {
                 gainAp(7, true);
@@ -1107,7 +1126,7 @@ public class Character extends AbstractCharacterObject {
                     gainAp(5, true);
                 }
             }
-        } else {    // thanks Periwinks for noticing an AP shortage from lower levels
+        } else { // thanks Periwinks for noticing an AP shortage from lower levels
             if (GameConfig.getServerBoolean("use_starting_ap_4") && newJob.getId() % 1000 >= 1) {
                 gainAp(4, true);
             }
@@ -1121,35 +1140,35 @@ public class Character extends AbstractCharacterObject {
 
         int addhp = 0, addmp = 0;
         int job_ = job.getId() % 1000; // lame temp "fix"
-        if (job_ == 100) {                      // 1st warrior
+        if (job_ == 100) { // 1st warrior
             addhp += Randomizer.rand(200, 250);
-        } else if (job_ == 200) {               // 1st mage
+        } else if (job_ == 200) { // 1st mage
             addmp += Randomizer.rand(100, 150);
-        } else if (job_ % 100 == 0) {           // 1st others
+        } else if (job_ % 100 == 0) { // 1st others
             addhp += Randomizer.rand(100, 150);
             addmp += Randomizer.rand(25, 50);
-        } else if (job_ > 0 && job_ < 200) {    // 2nd~4th warrior
+        } else if (job_ > 0 && job_ < 200) { // 2nd~4th warrior
             addhp += Randomizer.rand(300, 350);
-        } else if (job_ < 300) {                // 2nd~4th mage
+        } else if (job_ < 300) { // 2nd~4th mage
             addmp += Randomizer.rand(450, 500);
-        } else {                  // 2nd~4th others
+        } else { // 2nd~4th others
             addhp += Randomizer.rand(300, 350);
             addmp += Randomizer.rand(150, 200);
         }
-        
+
         /*
-        //aran perks?
-        int newJobId = newJob.getId();
-        if(newJobId == 2100) {          // become aran1
-            addhp += 275;
-            addmp += 15;
-        } else if(newJobId == 2110) {   // become aran2
-            addmp += 275;
-        } else if(newJobId == 2111) {   // become aran3
-            addhp += 275;
-            addmp += 275;
-        }
-        */
+         * //aran perks?
+         * int newJobId = newJob.getId();
+         * if(newJobId == 2100) { // become aran1
+         * addhp += 275;
+         * addmp += 15;
+         * } else if(newJobId == 2110) { // become aran2
+         * addmp += 275;
+         * } else if(newJobId == 2111) { // become aran3
+         * addhp += 275;
+         * addmp += 275;
+         * }
+         */
 
         effLock.lock();
         statWlock.lock();
@@ -1200,7 +1219,11 @@ public class Character extends AbstractCharacterObject {
 
         if (GameConfig.getServerBoolean("use_announce_change_job")) {
             if (!this.isGM()) {
-                broadcastAcquaintances(6, I18nUtil.getMessage("Character.Job.Change.message", getName(), GameConstants.ordinal(GameConstants.getJobBranch(newJob)), GameConstants.getJobName(this.job.getId())));        // thanks Vcoc for noticing job name appearing in uppercase here
+                broadcastAcquaintances(6,
+                        I18nUtil.getMessage("Character.Job.Change.message", getName(),
+                                GameConstants.ordinal(GameConstants.getJobBranch(newJob)),
+                                GameConstants.getJobName(this.job.getId()))); // thanks Vcoc for noticing job name
+                                                                              // appearing in uppercase here
             }
         }
     }
@@ -1220,12 +1243,12 @@ public class Character extends AbstractCharacterObject {
         if (guild != null) {
             guild.broadcast(packet, id);
         }
-        
+
         /*
-        if(partnerid > 0) {
-            partner.sendPacket(packet); not yet implemented
-        }
-        */
+         * if(partnerid > 0) {
+         * partner.sendPacket(packet); not yet implemented
+         * }
+         */
         sendPacket(packet);
     }
 
@@ -1247,7 +1270,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void broadcastStance() {
-        map.broadcastMessage(this, PacketCreator.movePlayer(id, this.getIdleMovement(), AbstractAnimatedMapObject.IDLE_MOVEMENT_PACKET_LENGTH), false);
+        map.broadcastMessage(this, PacketCreator.movePlayer(id, this.getIdleMovement(),
+                AbstractAnimatedMapObject.IDLE_MOVEMENT_PACKET_LENGTH), false);
     }
 
     public MapleMap getWarpMap(int map) {
@@ -1263,7 +1287,8 @@ public class Character extends AbstractCharacterObject {
         return warpMap;
     }
 
-    // for use ONLY inside OnUserEnter map scripts that requires a player to change map while still moving between maps.
+    // for use ONLY inside OnUserEnter map scripts that requires a player to change
+    // map while still moving between maps.
     public void warpAhead(int map) {
         newWarpMap = map;
     }
@@ -1330,10 +1355,10 @@ public class Character extends AbstractCharacterObject {
         changeMap(map, null);
     }
 
-
     /**
      * 玩家角色更改地图
-     * @param map   地图ID
+     * 
+     * @param map 地图ID
      */
     public void changeMap(int map, Object pt) {
         MapleMap warpMap;
@@ -1343,7 +1368,8 @@ public class Character extends AbstractCharacterObject {
             warpMap = eim.getMapInstance(map);
         } else {
             warpMap = getMap(map, true);
-            if (warpMap == null) return; //判断地图不存在则直接返回并发送提示消息。
+            if (warpMap == null)
+                return; // 判断地图不存在则直接返回并发送提示消息。
         }
 
         Portal portal = switch (pt) {
@@ -1367,7 +1393,8 @@ public class Character extends AbstractCharacterObject {
     public void changeMap(final MapleMap target, Portal pto) {
         canWarpCounter++;
 
-        eventChangedMap(target.getId());    // player can be dropped from an event here, hence the new warping target.  //玩家可以从这里的事件中退出，因此成为新的扭曲目标。
+        eventChangedMap(target.getId()); // player can be dropped from an event here, hence the new warping target.
+                                         // //玩家可以从这里的事件中退出，因此成为新的扭曲目标。
         MapleMap to = getWarpMap(target.getId());
         if (pto == null) {
             pto = to.getPortal(0);
@@ -1400,7 +1427,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void forceChangeMap(final MapleMap target, Portal pto) {
-        // will actually enter the map given as parameter, regardless of being an eventmap or whatnot       //将实际输入作为参数给出的映射，无论是事件映射还是其他什么
+        // will actually enter the map given as parameter, regardless of being an
+        // eventmap or whatnot //将实际输入作为参数给出的映射，无论是事件映射还是其他什么
 
         canWarpCounter++;
         eventChangedMap(MapId.NONE);
@@ -1415,8 +1443,9 @@ public class Character extends AbstractCharacterObject {
                 }
             }
 
-            // thanks Thora for finding an issue with players not being actually warped into the target event map (rather sent to the event starting map)
-            //感谢Thora发现玩家实际上没有被扭曲到目标事件地图中（而是被发送到事件开始地图）的问题
+            // thanks Thora for finding an issue with players not being actually warped into
+            // the target event map (rather sent to the event starting map)
+            // 感谢Thora发现玩家实际上没有被扭曲到目标事件地图中（而是被发送到事件开始地图）的问题
             mapEim.registerPlayer(this, false);
         }
 
@@ -1447,9 +1476,10 @@ public class Character extends AbstractCharacterObject {
 
                     if (value == 1 && ((returnMapid == MapId.EL_NATH && thisMapid != MapId.ORBIS_TOWER_BOTTOM)
                             || returnMapid == MapId.INTERNET_CAFE)) {
-                        return true;        //protection from cold
+                        return true; // protection from cold
                     } else {
-                        return value == 2 && (returnMapid == MapId.AQUARIUM || thisMapid == MapId.ORBIS_TOWER_BOTTOM);        //breathing underwater
+                        return value == 2 && (returnMapid == MapId.AQUARIUM || thisMapid == MapId.ORBIS_TOWER_BOTTOM); // breathing
+                                                                                                                       // underwater
                     }
                 }
             }
@@ -1461,8 +1491,8 @@ public class Character extends AbstractCharacterObject {
         for (Item it : this.getInventory(InventoryType.EQUIPPED).list()) {
             if ((it.getFlag() & ItemConstants.COLD) == ItemConstants.COLD
                     && ((returnMapid == MapId.EL_NATH && thisMapid != MapId.ORBIS_TOWER_BOTTOM)
-                    || returnMapid == MapId.INTERNET_CAFE)) {
-                return true;        //protection from cold
+                            || returnMapid == MapId.INTERNET_CAFE)) {
+                return true; // protection from cold
             }
         }
 
@@ -1519,7 +1549,8 @@ public class Character extends AbstractCharacterObject {
             MapleMap mapObj = mapRef.get();
 
             if (mapObj != null) {
-                List<MapItem> partyMapItems = mapObj.updatePlayerItemDropsToParty(partyId, id, partyMembers, partyLeaver);
+                List<MapItem> partyMapItems = mapObj.updatePlayerItemDropsToParty(partyId, id, partyMembers,
+                        partyLeaver);
                 if (map.hashCode() == mapObj.hashCode()) {
                     partyItems = partyMapItems;
                 }
@@ -1544,7 +1575,8 @@ public class Character extends AbstractCharacterObject {
         target.removePartyDoor(party);
     }
 
-    private static void updatePartyTownDoors(Party party, Character target, Character partyLeaver, List<Character> partyMembers) {
+    private static void updatePartyTownDoors(Party party, Character target, Character partyLeaver,
+            List<Character> partyMembers) {
         if (partyLeaver != null) {
             removePartyPlayerDoor(party, target);
         } else {
@@ -1677,6 +1709,7 @@ public class Character extends AbstractCharacterObject {
 
     /**
      * 玩家更改地图 内部方法
+     * 
      * @param to
      * @param pos
      * @param warpPacket
@@ -1685,7 +1718,8 @@ public class Character extends AbstractCharacterObject {
         if (!canWarpMap) {
             return;
         }
-        if (getMap(to.getId(), true) == null) return; //判断地图不存在则直接返回并发送提示消息。
+        if (getMap(to.getId(), true) == null)
+            return; // 判断地图不存在则直接返回并发送提示消息。
 
         this.mapTransitioning.set(true);
 
@@ -1712,7 +1746,8 @@ public class Character extends AbstractCharacterObject {
             try {
                 if (party != null) {
                     mpc.setMapId(to.getId());
-                    sendPacket(PacketCreator.updateParty(client.getChannel(), party, PartyOperation.SILENT_UPDATE, null));
+                    sendPacket(
+                            PacketCreator.updateParty(client.getChannel(), party, PartyOperation.SILENT_UPDATE, null));
                     updatePartyMemberHPInternal();
                 }
             } finally {
@@ -1721,16 +1756,16 @@ public class Character extends AbstractCharacterObject {
             if (Character.this.getParty() != null) {
                 Character.this.getParty().setEnemy(k);
             }
-            silentPartyUpdateInternal(getParty());  // EIM script calls inside
-        } else {    //切换地图时卡住了
+            silentPartyUpdateInternal(getParty()); // EIM script calls inside
+        } else { // 切换地图时卡住了
             log.warn(I18nUtil.getLogMessage("Character.Map.Change.warn2"), getName(), map.getMapName(), map.getId());
-            client.disconnect(true, false);     // thanks BHB for noticing a player storage stuck case here
+            client.disconnect(true, false); // thanks BHB for noticing a player storage stuck case here
             return;
         }
 
         notifyMapTransferToPartner(map.getId());
 
-        //alas, new map has been specified when a warping was being processed...
+        // alas, new map has been specified when a warping was being processed...
         if (newWarpMap != -1) {
             canWarpMap = true;
 
@@ -1751,6 +1786,7 @@ public class Character extends AbstractCharacterObject {
 
     /**
      * 玩家角色是否处于切换地图的状态
+     * 
      * @return boolean
      */
     public boolean isChangingMaps() {
@@ -1758,7 +1794,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     /**
-     *  设置地图转换完成
+     * 设置地图转换完成
      */
     public void setMapTransitionComplete() {
         this.mapTransitioning.set(false);
@@ -1776,7 +1812,8 @@ public class Character extends AbstractCharacterObject {
             }
         } else {
             skills.remove(skill);
-            sendPacket(PacketCreator.updateSkill(skill.getId(), newLevel, newMasterlevel, -1)); //Shouldn't use expiration anymore :)
+            sendPacket(PacketCreator.updateSkill(skill.getId(), newLevel, newMasterlevel, -1)); // Shouldn't use
+                                                                                                // expiration anymore :)
             characterService.removeSkill(SkillsDO.builder().skillid(skill.getId()).characterid(getId()).build());
         }
     }
@@ -1806,9 +1843,11 @@ public class Character extends AbstractCharacterObject {
 
                     sendPacket(PacketCreator.showOwnBerserk(skilllevel, berserk));
                     if (!isHidden) {
-                        getMap().broadcastMessage(Character.this, PacketCreator.showBerserk(getId(), skilllevel, berserk), false);
+                        getMap().broadcastMessage(Character.this,
+                                PacketCreator.showBerserk(getId(), skilllevel, berserk), false);
                     } else {
-                        getMap().broadcastGMMessage(Character.this, PacketCreator.showBerserk(getId(), skilllevel, berserk), false);
+                        getMap().broadcastGMMessage(Character.this,
+                                PacketCreator.showBerserk(getId(), skilllevel, berserk), false);
                     }
                 }, 5000, 3000);
             }
@@ -1818,7 +1857,8 @@ public class Character extends AbstractCharacterObject {
     public void checkMessenger() {
         if (messenger != null && messengerPosition < 4 && messengerPosition > -1) {
             World worldz = getWorldServer();
-            worldz.silentJoinMessenger(messenger.getId(), new MessengerCharacter(this, messengerPosition), messengerPosition);
+            worldz.silentJoinMessenger(messenger.getId(), new MessengerCharacter(this, messengerPosition),
+                    messengerPosition);
             worldz.updateMessenger(getMessenger().getId(), name, client.getChannel());
         }
     }
@@ -1882,30 +1922,30 @@ public class Character extends AbstractCharacterObject {
      *
      * @param itemId 物品的唯一标识ID，应符合游戏物品ID规范（消耗品类ID以2开头）
      * @return boolean 消耗是否成功应用：
-     *                 - true: 道具效果已应用/处理完成
-     *                 - false: 非消耗品或无需立即使用
+     *         - true: 道具效果已应用/处理完成
+     *         - false: 非消耗品或无需立即使用
      * @throws NullPointerException 如果无法获取物品信息或效果对象可能抛出
      *
      * @description
-     * 实现以下核心逻辑：
-     * 1. 验证物品是否为可消耗类型（ID首数字为2）
-     * 2. 检查物品的"拾取即用"标记
-     * 3. 处理队伍道具的特殊场景：
-     *    - 普通队伍道具：对同地图存活队友应用效果
-     *    - 全体治疗道具：解除队友异常状态
-     * 4. 处理怪物卡片收集（ID 238xxxx类型）
+     *              实现以下核心逻辑：
+     *              1. 验证物品是否为可消耗类型（ID首数字为2）
+     *              2. 检查物品的"拾取即用"标记
+     *              3. 处理队伍道具的特殊场景：
+     *              - 普通队伍道具：对同地图存活队友应用效果
+     *              - 全体治疗道具：解除队友异常状态
+     *              4. 处理怪物卡片收集（ID 238xxxx类型）
      *
      * @example
-     * // 典型使用场景
-     * if(applyConsumeOnPickup(2001000)) {
-     *     removeFromInventory(item); // 消耗后移除物品
-     * }
+     *          // 典型使用场景
+     *          if(applyConsumeOnPickup(2001000)) {
+     *          removeFromInventory(item); // 消耗后移除物品
+     *          }
      *
      * @note
-     * - 物品ID格式约定：
-     *   - 第1位：物品大类（2=消耗品）
-     *   - 第2-4位：物品子类（238=怪物卡片）
-     * - 队伍道具效果只会影响同地图的存活队友
+     *       - 物品ID格式约定：
+     *       - 第1位：物品大类（2=消耗品）
+     *       - 第2-4位：物品子类（238=怪物卡片）
+     *       - 队伍道具效果只会影响同地图的存活队友
      */
     public boolean applyConsumeOnPickup(final int itemId) {// 判断拾取后是否立即消耗道具的方法
         if (itemId / 1000000 != 2) {// 检查物品ID是否属于消耗品类（假设ID以2开头）
@@ -1951,14 +1991,33 @@ public class Character extends AbstractCharacterObject {
         pickupItem(ob, -1);
     }
 
-    public final void pickupItem(MapObject ob, int petIndex) {     // yes, one picks the MapObject, not the MapItem     //是的，选择MapObject，而不是MapItem
-        if (ob == null) {                                               // pet index refers to the one picking up the item      //宠物指数是指捡起物品的人
+    public final void pickupItems(List<MapObject> obs, int petIndex) {
+        // Use compareAndSet for atomic check-and-set (single flight pattern)
+        if (!petLootInProgress.compareAndSet(false, true)) {
+            enableActions();
+            return;
+        }
+        try {
+            for (MapObject ob : obs) {
+                pickupItem(ob, petIndex);
+            }
+        } catch (Exception e) {
+            log.error(I18nUtil.getLogMessage("Character.pickupItems.error", getName()), e);
+        } finally {
+            petLootInProgress.set(false);
+            enableActions();
+        }
+    }
+
+    public final void pickupItem(MapObject ob, int petIndex) { // yes, one picks the MapObject, not the MapItem
+                                                               // //是的，选择MapObject，而不是MapItem
+        if (ob == null) { // pet index refers to the one picking up the item //宠物指数是指捡起物品的人
             return;
         }
 
         if (ob instanceof MapItem mapitem) {
             if (System.currentTimeMillis() - mapitem.getDropTime() < 400 || !mapitem.canBePickedBy(this)) {
-                enableActions();
+                enableActions(petIndex);
                 return;
             }
 
@@ -1972,21 +2031,25 @@ public class Character extends AbstractCharacterObject {
             try {
                 if (mapitem.isPickedUp()) {
                     sendPacket(PacketCreator.showItemUnavailable());
-                    enableActions();
+                    enableActions(petIndex);
                     return;
                 }
 
                 boolean isPet = petIndex > -1;
-                final Packet pickupPacket = PacketCreator.removeItemFromMap(mapitem.getObjectId(), (isPet) ? 5 : 2, this.getId(), isPet, petIndex);
+                final Packet pickupPacket = PacketCreator.removeItemFromMap(mapitem.getObjectId(), (isPet) ? 5 : 2,
+                        this.getId(), isPet, petIndex);
 
                 Item mItem = mapitem.getItem();
                 boolean hasSpaceInventory = true;
                 ItemInformationProvider ii = ItemInformationProvider.getInstance();
-                if (ItemId.isNxCard(mapitem.getItemId()) || mapitem.getMeso() > 0 || ii.isConsumeOnPickup(mapitem.getItemId()) || (hasSpaceInventory = InventoryManipulator.checkSpace(client, mapitem.getItemId(), mItem.getQuantity(), mItem.getOwner()))) {
+                if (ItemId.isNxCard(mapitem.getItemId()) || mapitem.getMeso() > 0
+                        || ii.isConsumeOnPickup(mapitem.getItemId()) || (hasSpaceInventory = InventoryManipulator
+                                .checkSpace(client, mapitem.getItemId(), mItem.getQuantity(), mItem.getOwner()))) {
                     int mapId = this.getMapId();
 
-                    if ((MapId.isSelfLootableOnly(mapId))) {//happyville trees and guild PQ
-                        if (!mapitem.isPlayerDrop() || mapitem.getDropper().getObjectId() == client.getPlayer().getObjectId()) {
+                    if ((MapId.isSelfLootableOnly(mapId))) {// happyville trees and guild PQ
+                        if (!mapitem.isPlayerDrop()
+                                || mapitem.getDropper().getObjectId() == client.getPlayer().getObjectId()) {
                             if (mapitem.getMeso() > 0) {
                                 if (!mpcs.isEmpty()) {
                                     int mesosamm = mapitem.getMeso() / mpcs.size();
@@ -2001,34 +2064,38 @@ public class Character extends AbstractCharacterObject {
 
                                 this.getMap().pickItemDrop(pickupPacket, mapitem);
                             } else if (ItemId.isNxCard(mapitem.getItemId())) {
-                                // Add NX to account, show effect and make item disappear   //添加点券到账户，是否展示捡到点券，并移除物品
-                                int nxGain = (mapitem.getItemId() == ItemId.NX_CARD_100 ? 100 : 250) * mItem.getQuantity(); //使点券支持按数量相乘
+                                // Add NX to account, show effect and make item disappear
+                                // //添加点券到账户，是否展示捡到点券，并移除物品
+                                int nxGain = (mapitem.getItemId() == ItemId.NX_CARD_100 ? 100 : 250)
+                                        * mItem.getQuantity(); // 使点券支持按数量相乘
                                 this.getCashShop().gainCash(CashShop.NX_CREDIT, nxGain);
 
-                                if (GameConfig.getServerBoolean("use_announce_nx_coupon_loot")) {       //捡到点券是否展示
-                                    showHint(I18nUtil.getMessage("Character.pickupItem.message1", nxGain, this.getCashShop().getCash(CashShop.NX_CREDIT)), 300);
-                                    //showHint("捡到 #e#b" + nxGain + " NX#k#n (" + this.getCashShop().getCash(CashShop.NX_CREDIT) + " NX)", 300);
+                                if (GameConfig.getServerBoolean("use_announce_nx_coupon_loot")) { // 捡到点券是否展示
+                                    showHint(I18nUtil.getMessage("Character.pickupItem.message1", nxGain,
+                                            this.getCashShop().getCash(CashShop.NX_CREDIT)), 300);
+                                    // showHint("捡到 #e#b" + nxGain + " NX#k#n (" +
+                                    // this.getCashShop().getCash(CashShop.NX_CREDIT) + " NX)", 300);
                                 }
 
                                 this.getMap().pickItemDrop(pickupPacket, mapitem);
                             } else if (InventoryManipulator.addFromDrop(client, mItem, true)) {
                                 this.getMap().pickItemDrop(pickupPacket, mapitem);
                             } else {
-                                enableActions();
+                                enableActions(petIndex);
                                 return;
                             }
                         } else {
                             sendPacket(PacketCreator.showItemUnavailable());
-                            enableActions();
+                            enableActions(petIndex);
                             return;
                         }
-                        enableActions();
+                        enableActions(petIndex);
                         return;
                     }
 
                     if (!this.needQuestItem(mapitem.getQuest(), mapitem.getItemId())) {
                         sendPacket(PacketCreator.showItemUnavailable());
-                        enableActions();
+                        enableActions(petIndex);
                         return;
                     }
 
@@ -2049,26 +2116,28 @@ public class Character extends AbstractCharacterObject {
                             itemScript = info;
                         } else {
                             if (!InventoryManipulator.addFromDrop(client, mItem, true)) {
-                                enableActions();
+                                enableActions(petIndex);
                                 return;
                             }
                         }
                     } else if (ItemId.isNxCard(mapitem.getItemId())) {
                         // Add NX to account, show effect and make item disappear
-                        int nxGain = (mapitem.getItemId() == ItemId.NX_CARD_100 ? 100 : 250) * mItem.getQuantity(); //使点券支持按数量相乘
+                        int nxGain = (mapitem.getItemId() == ItemId.NX_CARD_100 ? 100 : 250) * mItem.getQuantity(); // 使点券支持按数量相乘
                         this.getCashShop().gainCash(CashShop.NX_CREDIT, nxGain);
 
-                        if (GameConfig.getServerBoolean("use_announce_nx_coupon_loot")) {       //捡到点券是否展示
-                            showHint(I18nUtil.getMessage("Character.pickupItem.message1", nxGain, this.getCashShop().getCash(CashShop.NX_CREDIT)), 300);
-                            //showHint("捡到 #e#b" + nxGain + " NX#k#n (" + this.getCashShop().getCash(CashShop.NX_CREDIT) + " NX)", 300);
+                        if (GameConfig.getServerBoolean("use_announce_nx_coupon_loot")) { // 捡到点券是否展示
+                            showHint(I18nUtil.getMessage("Character.pickupItem.message1", nxGain,
+                                    this.getCashShop().getCash(CashShop.NX_CREDIT)), 300);
+                            // showHint("捡到 #e#b" + nxGain + " NX#k#n (" +
+                            // this.getCashShop().getCash(CashShop.NX_CREDIT) + " NX)", 300);
                         }
-                    } else if (applyConsumeOnPickup(mItem.getItemId())) {//此段判断为处理捡取治疗道具和怪物卡加入图鉴
+                    } else if (applyConsumeOnPickup(mItem.getItemId())) {// 此段判断为处理捡取治疗道具和怪物卡加入图鉴
                     } else if (InventoryManipulator.addFromDrop(client, mItem, true)) {
                         if (mItem.getItemId() == ItemId.ARPQ_SPIRIT_JEWEL) {
                             updateAriantScore();
                         }
                     } else {
-                        enableActions();
+                        enableActions(petIndex);
                         return;
                     }
 
@@ -2086,7 +2155,7 @@ public class Character extends AbstractCharacterObject {
                 ism.runItemScript(client, itemScript);
             }
         }
-        enableActions();
+        enableActions(petIndex);
     }
 
     public int countItem(int itemid) {
@@ -2147,7 +2216,8 @@ public class Character extends AbstractCharacterObject {
     private void nextPendingRequest(Client c) {
         CharacterNameAndId pendingBuddyRequest = c.getPlayer().getBuddylist().pollPendingRequest();
         if (pendingBuddyRequest != null) {
-            c.sendPacket(PacketCreator.requestBuddylistAdd(pendingBuddyRequest.getId(), c.getPlayer().getId(), pendingBuddyRequest.getName()));
+            c.sendPacket(PacketCreator.requestBuddylistAdd(pendingBuddyRequest.getId(), c.getPlayer().getId(),
+                    pendingBuddyRequest.getName()));
         }
     }
 
@@ -2219,13 +2289,13 @@ public class Character extends AbstractCharacterObject {
 
     private static Pair<Integer, Pair<Integer, Integer>> getChairTaskIntervalRate(int maxhp, int maxmp) {
         /*
-        此处2个参数CHAIR_EXTRA_HEAL_MULTIPLIER和CHAIR_EXTRA_HEAL_MAX_DELAY已被我删除
-        1.在倍率固定的情况下，既不希望定时任务执行太快，又不希望定时任务执行太慢
-        2.在固定最大时间的情况下，既不希望恢复量太大，又不希望恢复量太小
-        3.关键是这2个参数又都能配置，在某些场景下，就会打破上述他自己设置的限制
-        4.所以，这个参数需要个人进行复杂的计算才能配置，不能乱配，但他又放开让你都允许配置
-        5.综上，这种属于既要又要，什么都要只会害了你，所以我把这2个参数都干掉了
-        6.如果确实要放开允许配置，最多把CHAIR_EXTRA_HEAL_MAX_DELAY放开即可，这个参数还算有点意义，但也需要简单计算一下得到他合适的值
+         * 此处2个参数CHAIR_EXTRA_HEAL_MULTIPLIER和CHAIR_EXTRA_HEAL_MAX_DELAY已被我删除
+         * 1.在倍率固定的情况下，既不希望定时任务执行太快，又不希望定时任务执行太慢
+         * 2.在固定最大时间的情况下，既不希望恢复量太大，又不希望恢复量太小
+         * 3.关键是这2个参数又都能配置，在某些场景下，就会打破上述他自己设置的限制
+         * 4.所以，这个参数需要个人进行复杂的计算才能配置，不能乱配，但他又放开让你都允许配置
+         * 5.综上，这种属于既要又要，什么都要只会害了你，所以我把这2个参数都干掉了
+         * 6.如果确实要放开允许配置，最多把CHAIR_EXTRA_HEAL_MAX_DELAY放开即可，这个参数还算有点意义，但也需要简单计算一下得到他合适的值
          */
         float toHeal = Math.max(maxhp, maxmp);
         float maxDuration = SECONDS.toMillis(21);
@@ -2316,7 +2386,7 @@ public class Character extends AbstractCharacterObject {
                     sendPacket(PacketCreator.showOwnRecovery(recHP));
                     getMap().broadcastMessage(Character.this, PacketCreator.showRecovery(id, recHP), false);
                 } else if (Character.this.getMp() >= localMaxMp) {
-                    stopChairTask();    // optimizing schedule management when player is already with full pool.
+                    stopChairTask(); // optimizing schedule management when player is already with full pool.
                 }
 
                 addMPHP(healHP, healMP);
@@ -2383,7 +2453,8 @@ public class Character extends AbstractCharacterObject {
             List<BuffStatValueHolder> mbsvhList = getAllStatups();
             for (BuffStatValueHolder mbsvh : mbsvhList) {
                 if (mbsvh.effect.isSkill()) {
-                    if (mbsvh.effect.getBuffSourceId() != Aran.COMBO_ABILITY) { // check discovered thanks to Croosade dev team
+                    if (mbsvh.effect.getBuffSourceId() != Aran.COMBO_ABILITY) { // check discovered thanks to Croosade
+                                                                                // dev team
                         cancelEffect(mbsvh.effect, false, mbsvh.startTime);
                     }
                 }
@@ -2437,7 +2508,8 @@ public class Character extends AbstractCharacterObject {
                 long expTime = curTime + di.getValue().getLeft();
 
                 diseaseExpires.put(di.getKey(), expTime);
-                diseases.put(di.getKey(), new Pair<>(new DiseaseValueHolder(curTime, di.getValue().getLeft()), di.getValue().getRight()));
+                diseases.put(di.getKey(),
+                        new Pair<>(new DiseaseValueHolder(curTime, di.getValue().getLeft()), di.getValue().getRight()));
             }
         } finally {
             chrLock.unlock();
@@ -2449,7 +2521,8 @@ public class Character extends AbstractCharacterObject {
 
         chrLock.lock();
         try {
-            // Poison damage visibility and diseases status visibility, extended through map transitions thanks to Ronan
+            // Poison damage visibility and diseases status visibility, extended through map
+            // transitions thanks to Ronan
             if (!this.isLoggedInWorld()) {
                 return;
             }
@@ -2462,7 +2535,8 @@ public class Character extends AbstractCharacterObject {
         for (Entry<Disease, Pair<DiseaseValueHolder, MobSkill>> di : chrDiseases) {
             Disease disease = di.getKey();
             MobSkill skill = di.getValue().getRight();
-            final List<Pair<Disease, Integer>> debuff = Collections.singletonList(new Pair<>(disease, Integer.valueOf(skill.getX())));
+            final List<Pair<Disease, Integer>> debuff = Collections
+                    .singletonList(new Pair<>(disease, Integer.valueOf(skill.getX())));
 
             if (disease != Disease.SLOW) {
                 map.broadcastMessage(PacketCreator.giveForeignDebuff(id, debuff, skill));
@@ -2479,7 +2553,8 @@ public class Character extends AbstractCharacterObject {
             for (Entry<Disease, Pair<Long, MobSkill>> di : chr.getAllDiseases().entrySet()) {
                 Disease disease = di.getKey();
                 MobSkill skill = di.getValue().getRight();
-                final List<Pair<Disease, Integer>> debuff = Collections.singletonList(new Pair<>(disease, Integer.valueOf(skill.getX())));
+                final List<Pair<Disease, Integer>> debuff = Collections
+                        .singletonList(new Pair<>(disease, Integer.valueOf(skill.getX())));
 
                 if (disease != Disease.SLOW) {
                     this.sendPacket(PacketCreator.giveForeignDebuff(cid, debuff, skill));
@@ -2511,7 +2586,8 @@ public class Character extends AbstractCharacterObject {
                 sitChair(-1);
             }
 
-            final List<Pair<Disease, Integer>> debuff = Collections.singletonList(new Pair<>(disease, Integer.valueOf(skill.getX())));
+            final List<Pair<Disease, Integer>> debuff = Collections
+                    .singletonList(new Pair<>(disease, Integer.valueOf(skill.getX())));
             sendPacket(PacketCreator.giveDebuff(debuff, skill));
 
             if (disease != Disease.SLOW) {
@@ -2549,7 +2625,7 @@ public class Character extends AbstractCharacterObject {
         dispelDebuff(Disease.POISON);
         dispelDebuff(Disease.SEAL);
         dispelDebuff(Disease.WEAKEN);
-        dispelDebuff(Disease.SLOW);    // thanks Conrad for noticing ZOMBIFY isn't dispellable
+        dispelDebuff(Disease.SLOW); // thanks Conrad for noticing ZOMBIFY isn't dispellable
     }
 
     public void purgeDebuffs() {
@@ -2573,7 +2649,8 @@ public class Character extends AbstractCharacterObject {
         List<BuffStatValueHolder> allBuffs = getAllStatups();
         for (BuffStatValueHolder mbsvh : allBuffs) {
             if (skillid == 0) {
-                if (mbsvh.effect.isSkill() && (mbsvh.effect.getSourceId() % 10000000 == 1004 || dispelSkills(mbsvh.effect.getSourceId()))) {
+                if (mbsvh.effect.isSkill() && (mbsvh.effect.getSourceId() % 10000000 == 1004
+                        || dispelSkills(mbsvh.effect.getSourceId()))) {
                     cancelEffect(mbsvh.effect, false, mbsvh.startTime);
                 }
             } else if (mbsvh.effect.isSkill() && mbsvh.effect.getSourceId() == skillid) {
@@ -2585,14 +2662,16 @@ public class Character extends AbstractCharacterObject {
     private static boolean dispelSkills(int skillid) {
         return switch (skillid) {
             case DarkKnight.BEHOLDER, FPArchMage.ELQUINES, ILArchMage.IFRIT, Priest.SUMMON_DRAGON, Bishop.BAHAMUT,
-                 Ranger.PUPPET, Ranger.SILVER_HAWK, Sniper.PUPPET, Sniper.GOLDEN_EAGLE, Hermit.SHADOW_PARTNER -> true;
+                    Ranger.PUPPET, Ranger.SILVER_HAWK, Sniper.PUPPET, Sniper.GOLDEN_EAGLE, Hermit.SHADOW_PARTNER ->
+                true;
             default -> false;
         };
     }
 
     public void changeFaceExpression(int emote) {
         long timeNow = Server.getInstance().getCurrentTime();
-        // Client allows changing every 2 seconds. Give it a little bit of overhead for packet delays.
+        // Client allows changing every 2 seconds. Give it a little bit of overhead for
+        // packet delays.
         if (timeNow - lastExpression > 1500) {
             lastExpression = timeNow;
             getMap().broadcastMessage(this, PacketCreator.facialExpression(this, emote), false);
@@ -2600,7 +2679,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void doHurtHp() {
-        if (!(this.getInventory(InventoryType.EQUIPPED).findById(getMap().getHPDecProtect()) != null || buffMapProtection())) {
+        if (!(this.getInventory(InventoryType.EQUIPPED).findById(getMap().getHPDecProtect()) != null
+                || buffMapProtection())) {
             addHP(-getMap().getHPDec());
         }
     }
@@ -2611,7 +2691,8 @@ public class Character extends AbstractCharacterObject {
 
     /**
      * 给玩家角色发送消息
-     * @param type  0=聊天窗[note]蓝色消息；1=中间弹窗；2=？；3=？；4=？；5=聊天窗红色消息；6=聊天窗黄色消息
+     * 
+     * @param type    0=聊天窗[note]蓝色消息；1=中间弹窗；2=？；3=？；4=？；5=聊天窗红色消息；6=聊天窗黄色消息
      * @param message
      */
     public void dropMessage(int type, String message) {
@@ -2686,7 +2767,7 @@ public class Character extends AbstractCharacterObject {
                     long curTime = Server.getInstance().getCurrentTime();
                     for (Entry<Integer, Long> bel : es) {
                         if (curTime >= bel.getValue()) {
-                            toCancel.add(buffEffects.get(bel.getKey()).entrySet().iterator().next().getValue());    //rofl
+                            toCancel.add(buffEffects.get(bel.getKey()).entrySet().iterator().next().getValue()); // rofl
                         }
                     }
                 } finally {
@@ -2748,7 +2829,7 @@ public class Character extends AbstractCharacterObject {
 
                 long expiration, currenttime = System.currentTimeMillis();
                 Set<Skill> keys = getSkills().keySet();
-                for (Iterator<Skill> i = keys.iterator(); i.hasNext(); ) {
+                for (Iterator<Skill> i = keys.iterator(); i.hasNext();) {
                     Skill key = i.next();
                     SkillEntry skill = getSkills().get(key);
                     if (skill.expiration != -1 && skill.expiration < currenttime) {
@@ -2761,12 +2842,14 @@ public class Character extends AbstractCharacterObject {
                     for (Item item : inv.list()) {
                         expiration = item.getExpiration();
 
-                        if (expiration != -1 && (expiration < currenttime) && ((item.getFlag() & ItemConstants.LOCK) == ItemConstants.LOCK)) {
+                        if (expiration != -1 && (expiration < currenttime)
+                                && ((item.getFlag() & ItemConstants.LOCK) == ItemConstants.LOCK)) {
                             short lock = item.getFlag();
                             lock &= ~(ItemConstants.LOCK);
-                            item.setFlag(lock); //Probably need a check, else people can make expiring items into permanent items...
+                            item.setFlag(lock); // Probably need a check, else people can make expiring items into
+                                                // permanent items...
                             item.setExpiration(-1);
-                            forceUpdateItem(item);   //TEST :3
+                            forceUpdateItem(item); // TEST :3
                         } else if (expiration != -1 && expiration < currenttime) {
                             if (!ItemConstants.isPet(item.getItemId())) {
                                 sendPacket(PacketCreator.itemExpired(item.getItemId()));
@@ -2775,7 +2858,8 @@ public class Character extends AbstractCharacterObject {
                                     deletedCoupon = true;
                                 }
                             } else {
-                                Pet pet = item.getPet();   // thanks Lame for noticing pets not getting despawned after expiration time
+                                Pet pet = item.getPet(); // thanks Lame for noticing pets not getting despawned after
+                                                         // expiration time
                                 if (pet != null) {
                                     unEquipPet(pet, true);
                                 }
@@ -2793,7 +2877,8 @@ public class Character extends AbstractCharacterObject {
 
                     if (!toberemove.isEmpty()) {
                         for (Item item : toberemove) {
-                            InventoryManipulator.removeFromSlot(client, inv.getType(), item.getPosition(), item.getQuantity(), true);
+                            InventoryManipulator.removeFromSlot(client, inv.getType(), item.getPosition(),
+                                    item.getQuantity(), true);
                         }
 
                         ItemInformationProvider ii = ItemInformationProvider.getInstance();
@@ -2873,11 +2958,11 @@ public class Character extends AbstractCharacterObject {
         }
 
         if (gain < 0) {
-            gain = Integer.MAX_VALUE;   // integer overflow, heh.
+            gain = Integer.MAX_VALUE; // integer overflow, heh.
         }
 
         if (party < 0) {
-            party = Integer.MAX_VALUE;  // integer overflow, heh.
+            party = Integer.MAX_VALUE; // integer overflow, heh.
         }
 
         int equip = (int) Math.min((long) (gain / 10) * pendantExp, Integer.MAX_VALUE);
@@ -2908,7 +2993,8 @@ public class Character extends AbstractCharacterObject {
         sendPacket(PacketCreator.getShowExpGain((int) gain, equip, party, inChat, white));
     }
 
-    private synchronized void gainExpInternal(long gain, int equip, int party, boolean show, boolean inChat, boolean white) {   // need of method synchonization here detected thanks to MedicOP
+    private synchronized void gainExpInternal(long gain, int equip, int party, boolean show, boolean inChat,
+            boolean white) { // need of method synchonization here detected thanks to MedicOP
         long total = Math.max(gain + equip + party, -exp.get());
 
         if (level < getMaxLevel() && (allowExpGain || this.getEventInstance() != null)) {
@@ -2927,7 +3013,8 @@ public class Character extends AbstractCharacterObject {
             while (exp.get() >= ExpTable.getExpNeededForLevel(level)) {
                 levelUp(true);
 
-                String msg = I18nUtil.getMessage("Character.levelUp.globalNotice", getName(), getMap().getMapName(), getLevel());
+                String msg = I18nUtil.getMessage("Character.levelUp.globalNotice", getName(), getMap().getMapName(),
+                        getLevel());
                 if (GameConfig.getServerBoolean("use_announce_global_level_up") && !isGM()) {
                     for (Character player : getWorldServer().getPlayerStorage().getAllCharacters()) {
                         // 如果玩家在商城，将会以弹窗的形式发送，一堆弹窗会把玩家逼疯！
@@ -2943,7 +3030,8 @@ public class Character extends AbstractCharacterObject {
                     updateSingleStat(Stat.EXP, 0);
                     break;
                 }
-                if (GameConfig.getServerBoolean("use_level_up_protect")) break;
+                if (GameConfig.getServerBoolean("use_level_up_protect"))
+                    break;
             }
 
             if (leftover > 0) {
@@ -2958,8 +3046,7 @@ public class Character extends AbstractCharacterObject {
                             totalExpGained,
                             exp.get(),
                             new Timestamp(lastExpGainTime),
-                            id
-                    );
+                            id);
                     ExpLogger.putExpLogRecord(expLogRecord);
                 }
 
@@ -3009,7 +3096,8 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
-    public boolean canHoldMeso(int gain) {  // thanks lucasziron for pointing out a need to check space availability for mesos on player transactions
+    public boolean canHoldMeso(int gain) { // thanks lucasziron for pointing out a need to check space availability for
+                                           // mesos on player transactions
         long nextMeso = (long) meso.get() + gain;
         return nextMeso <= Integer.MAX_VALUE;
     }
@@ -3026,7 +3114,7 @@ public class Character extends AbstractCharacterObject {
         long nextMeso;
         petLock.lock();
         try {
-            nextMeso = (long) meso.get() + gain;  // thanks Thora for pointing integer overflow here
+            nextMeso = (long) meso.get() + gain; // thanks Thora for pointing integer overflow here
             if (nextMeso > Integer.MAX_VALUE) {
                 gain -= (int) (nextMeso - Integer.MAX_VALUE);
             } else if (nextMeso < 0) {
@@ -3159,7 +3247,7 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
-    public List<PlayerBuffValueHolder> getAllBuffs() {  // buff values will be stored in an arbitrary order
+    public List<PlayerBuffValueHolder> getAllBuffs() { // buff values will be stored in an arbitrary order
         effLock.lock();
         chrLock.lock();
         try {
@@ -3212,7 +3300,8 @@ public class Character extends AbstractCharacterObject {
         return false;
     }
 
-    private List<Pair<BuffStat, Integer>> getActiveStatupsFromSourceid(int sourceid) { // already under effLock & chrLock
+    private List<Pair<BuffStat, Integer>> getActiveStatupsFromSourceid(int sourceid) { // already under effLock &
+                                                                                       // chrLock
         List<Pair<BuffStat, Integer>> ret = new ArrayList<>();
         List<Pair<BuffStat, Integer>> singletonStatups = new ArrayList<>();
         for (Entry<BuffStat, BuffStatValueHolder> bel : buffEffects.get(sourceid).entrySet()) {
@@ -3226,7 +3315,8 @@ public class Character extends AbstractCharacterObject {
                 p = new Pair<>(mbs, 0);
             }
 
-            if (!isSingletonStatup(mbs)) {   // thanks resinate, Daddy Egg for pointing out morph issues when updating it along with other statups
+            if (!isSingletonStatup(mbs)) { // thanks resinate, Daddy Egg for pointing out morph issues when updating it
+                                           // along with other statups
                 ret.add(p);
             } else {
                 singletonStatups.add(p);
@@ -3244,7 +3334,8 @@ public class Character extends AbstractCharacterObject {
         return ret;
     }
 
-    private void addItemEffectHolder(Integer sourceid, long expirationtime, Map<BuffStat, BuffStatValueHolder> statups) {
+    private void addItemEffectHolder(Integer sourceid, long expirationtime,
+            Map<BuffStat, BuffStatValueHolder> statups) {
         buffEffects.put(sourceid, statups);
         buffExpires.put(sourceid, expirationtime);
     }
@@ -3319,22 +3410,20 @@ public class Character extends AbstractCharacterObject {
             log.debug("-------------------");
             log.debug("CACHED BUFF COUNT: {}", buffEffectsCount.entrySet().stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue())
-                    .collect(Collectors.joining(", "))
-            );
+                    .collect(Collectors.joining(", ")));
 
             log.debug("-------------------");
             log.debug("CACHED BUFFS: {}", buffEffects.entrySet().stream()
                     .map(entry -> entry.getKey() + ": (" + entry.getValue().entrySet().stream()
                             .map(innerEntry -> innerEntry.getKey().name() + innerEntry.getValue().value)
                             .collect(Collectors.joining(", ")) + ")")
-                    .collect(Collectors.joining(", "))
-            );
+                    .collect(Collectors.joining(", ")));
 
             log.debug("-------------------");
             log.debug("IN ACTION: {}", effects.entrySet().stream()
-                    .map(entry -> entry.getKey().name() + " -> " + ItemInformationProvider.getInstance().getName(entry.getValue().effect.getSourceId()))
-                    .collect(Collectors.joining(", "))
-            );
+                    .map(entry -> entry.getKey().name() + " -> "
+                            + ItemInformationProvider.getInstance().getName(entry.getValue().effect.getSourceId()))
+                    .collect(Collectors.joining(", ")));
         } finally {
             chrLock.unlock();
             effLock.unlock();
@@ -3383,14 +3472,17 @@ public class Character extends AbstractCharacterObject {
 
     private void dropBuffStats(List<Pair<BuffStat, BuffStatValueHolder>> effectsToCancel) {
         for (Pair<BuffStat, BuffStatValueHolder> cancelEffectCancelTasks : effectsToCancel) {
-            //boolean nestedCancel = false;
+            // boolean nestedCancel = false;
 
             chrLock.lock();
             try {
                 /*
-                if (buffExpires.get(cancelEffectCancelTasks.getRight().effect.getBuffSourceId()) != null) {
-                    nestedCancel = true;
-                }*/
+                 * if
+                 * (buffExpires.get(cancelEffectCancelTasks.getRight().effect.getBuffSourceId())
+                 * != null) {
+                 * nestedCancel = true;
+                 * }
+                 */
 
                 if (cancelEffectCancelTasks.getRight().bestApplied) {
                     fetchBestEffectFromItemEffectHolder(cancelEffectCancelTasks.getLeft());
@@ -3400,9 +3492,11 @@ public class Character extends AbstractCharacterObject {
             }
 
             /*
-            if (nestedCancel) {
-                this.cancelEffect(cancelEffectCancelTasks.getRight().effect, false, -1, false);
-            }*/
+             * if (nestedCancel) {
+             * this.cancelEffect(cancelEffectCancelTasks.getRight().effect, false, -1,
+             * false);
+             * }
+             */
         }
     }
 
@@ -3527,7 +3621,8 @@ public class Character extends AbstractCharacterObject {
             return false;
         }
 
-        // thanks xinyifly for noticing "Speed Infusion" crashing game when updating buffs during map transition
+        // thanks xinyifly for noticing "Speed Infusion" crashing game when updating
+        // buffs during map transition
         boolean active = mse.isActive(this);
         if (active) {
             return !activeEffects.contains(mse);
@@ -3537,7 +3632,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void updateActiveEffects() {
-        effLock.lock();     // thanks davidlafriniere, maple006, RedHat for pointing a deadlock occurring here
+        effLock.lock(); // thanks davidlafriniere, maple006, RedHat for pointing a deadlock occurring
+                        // here
         try {
             Set<BuffStat> updatedBuffs = new LinkedHashSet<>();
             Set<StatEffect> activeEffects = new LinkedHashSet<>();
@@ -3582,7 +3678,8 @@ public class Character extends AbstractCharacterObject {
                 }
             }
 
-            propagateBuffEffectUpdates(new LinkedHashMap<Integer, Pair<StatEffect, Long>>(), retrievedStats, removedStats);
+            propagateBuffEffectUpdates(new LinkedHashMap<Integer, Pair<StatEffect, Long>>(), retrievedStats,
+                    removedStats);
         } finally {
             chrLock.unlock();
             effLock.unlock();
@@ -3598,19 +3695,23 @@ public class Character extends AbstractCharacterObject {
         return !removedStats.isEmpty();
     }
 
-    private List<Pair<BuffStat, BuffStatValueHolder>> cancelEffectInternal(StatEffect effect, boolean overwrite, long startTime, Set<BuffStat> removedStats) {
+    private List<Pair<BuffStat, BuffStatValueHolder>> cancelEffectInternal(StatEffect effect, boolean overwrite,
+            long startTime, Set<BuffStat> removedStats) {
         Map<BuffStat, BuffStatValueHolder> buffstats = null;
         BuffStat ombs;
-        if (!overwrite) {   // is removing the source effect, meaning every effect from this srcid is being purged
+        if (!overwrite) { // is removing the source effect, meaning every effect from this srcid is being
+                          // purged
             buffstats = extractCurrentBuffStats(effect);
-        } else if ((ombs = getSingletonStatupFromEffect(effect)) != null) {   // removing all effects of a buff having non-shareable buff stat.
+        } else if ((ombs = getSingletonStatupFromEffect(effect)) != null) { // removing all effects of a buff having
+                                                                            // non-shareable buff stat.
             BuffStatValueHolder mbsvh = effects.get(ombs);
             if (mbsvh != null) {
                 buffstats = extractCurrentBuffStats(mbsvh.effect);
             }
         }
 
-        if (buffstats == null) {            // all else, is dropping ALL current statups that uses same stats as the given effect
+        if (buffstats == null) { // all else, is dropping ALL current statups that uses same stats as the given
+                                 // effect
             buffstats = extractLeastRelevantStatEffectsIfFull(effect);
         }
 
@@ -3729,7 +3830,8 @@ public class Character extends AbstractCharacterObject {
             for (Entry<BuffStat, Byte> it : stats.entrySet()) {
                 boolean uniqueBuff = isSingletonStatup(it.getKey());
 
-                if (it.getValue() >= (!uniqueBuff ? GameConfig.getServerByte("max_monitored_buff_stats") : 1) && effectStatups.contains(it.getKey())) {
+                if (it.getValue() >= (!uniqueBuff ? GameConfig.getServerByte("max_monitored_buff_stats") : 1)
+                        && effectStatups.contains(it.getKey())) {
                     BuffStatValueHolder mbsvh = minStatBuffs.get(it.getKey());
 
                     Map<BuffStat, BuffStatValueHolder> lpbe = buffEffects.get(mbsvh.effect.getBuffSourceId());
@@ -3779,7 +3881,8 @@ public class Character extends AbstractCharacterObject {
         return leafBuffCount;
     }
 
-    private static List<StatEffect> topologicalSortRemoveLeafStats(Map<StatEffect, Set<BuffStat>> stackedBuffStats, Map<BuffStat, Stack<StatEffect>> buffStack, Map<StatEffect, Integer> leafStatCount) {
+    private static List<StatEffect> topologicalSortRemoveLeafStats(Map<StatEffect, Set<BuffStat>> stackedBuffStats,
+            Map<BuffStat, Stack<StatEffect>> buffStack, Map<StatEffect, Integer> leafStatCount) {
         List<StatEffect> clearedStatEffects = new LinkedList<>();
         Set<BuffStat> clearedStats = new LinkedHashSet<>();
 
@@ -3800,7 +3903,8 @@ public class Character extends AbstractCharacterObject {
         return clearedStatEffects;
     }
 
-    private static void topologicalSortRebaseLeafStats(Map<StatEffect, Set<BuffStat>> stackedBuffStats, Map<BuffStat, Stack<StatEffect>> buffStack) {
+    private static void topologicalSortRebaseLeafStats(Map<StatEffect, Set<BuffStat>> stackedBuffStats,
+            Map<BuffStat, Stack<StatEffect>> buffStack) {
         for (Entry<BuffStat, Stack<StatEffect>> e : buffStack.entrySet()) {
             Stack<StatEffect> mseStack = e.getValue();
 
@@ -3867,11 +3971,13 @@ public class Character extends AbstractCharacterObject {
         return topologicalSortEffects(buffEffects);
     }
 
-    private List<Pair<Integer, Pair<StatEffect, Long>>> propagatePriorityBuffEffectUpdates(Set<BuffStat> retrievedStats) {
+    private List<Pair<Integer, Pair<StatEffect, Long>>> propagatePriorityBuffEffectUpdates(
+            Set<BuffStat> retrievedStats) {
         List<Pair<Integer, Pair<StatEffect, Long>>> priorityUpdateEffects = new LinkedList<>();
         Map<BuffStatValueHolder, StatEffect> yokeStats = new LinkedHashMap<>();
 
-        // priority buffsources: override buffstats for the client to perceive those as "currently buffed"
+        // priority buffsources: override buffstats for the client to perceive those as
+        // "currently buffed"
         Set<BuffStatValueHolder> mbsvhList = new LinkedHashSet<>(getAllStatups());
 
         for (BuffStatValueHolder mbsvh : mbsvhList) {
@@ -3884,9 +3990,9 @@ public class Character extends AbstractCharacterObject {
                         BuffStatValueHolder mbsvhe = effects.get(mbs);
 
                         // this shouldn't even be null...
-                        //if (mbsvh != null) {
+                        // if (mbsvh != null) {
                         yokeStats.put(mbsvh, mbsvhe.effect);
-                        //}
+                        // }
                     }
                 }
             }
@@ -3896,13 +4002,15 @@ public class Character extends AbstractCharacterObject {
             BuffStatValueHolder mbsvhPriority = e.getKey();
             StatEffect mseActive = e.getValue();
 
-            priorityUpdateEffects.add(new Pair<>(mseActive.getBuffSourceId(), new Pair<>(mbsvhPriority.effect, mbsvhPriority.startTime)));
+            priorityUpdateEffects.add(
+                    new Pair<>(mseActive.getBuffSourceId(), new Pair<>(mbsvhPriority.effect, mbsvhPriority.startTime)));
         }
 
         return priorityUpdateEffects;
     }
 
-    private void propagateBuffEffectUpdates(Map<Integer, Pair<StatEffect, Long>> retrievedEffects, Set<BuffStat> retrievedStats, Set<BuffStat> removedStats) {
+    private void propagateBuffEffectUpdates(Map<Integer, Pair<StatEffect, Long>> retrievedEffects,
+            Set<BuffStat> retrievedStats, Set<BuffStat> removedStats) {
         cancelInactiveBuffStats(retrievedStats, removedStats);
         if (retrievedStats.isEmpty()) {
             return;
@@ -3936,7 +4044,7 @@ public class Character extends AbstractCharacterObject {
                     BuffStat mbs = st.getLeft();
 
                     boolean relevantStatup = true;
-                    if (mbs == BuffStat.WATK) {  // not relevant for mages
+                    if (mbs == BuffStat.WATK) { // not relevant for mages
                         if (mageJob) {
                             relevantStatup = false;
                         }
@@ -3986,7 +4094,8 @@ public class Character extends AbstractCharacterObject {
             activeStatups.clear();
         }
 
-        List<Pair<Integer, Pair<StatEffect, Long>>> priorityEffects = propagatePriorityBuffEffectUpdates(retrievedStats);
+        List<Pair<Integer, Pair<StatEffect, Long>>> priorityEffects = propagatePriorityBuffEffectUpdates(
+                retrievedStats);
         for (Pair<Integer, Pair<StatEffect, Long>> lmse : priorityEffects) {
             Pair<StatEffect, Long> msel = lmse.getRight();
             activeStatups.addAll(getActiveStatupsFromSourceid(lmse.getLeft()));
@@ -4013,17 +4122,20 @@ public class Character extends AbstractCharacterObject {
     }
 
     private static boolean isSingletonStatup(BuffStat mbs) {
-        return switch (mbs) {           //HPREC and MPREC are supposed to be singleton
+        return switch (mbs) { // HPREC and MPREC are supposed to be singleton
             case COUPON_EXP1, COUPON_EXP2, COUPON_EXP3, COUPON_EXP4, COUPON_DRP1, COUPON_DRP2, COUPON_DRP3,
-                 MESO_UP_BY_ITEM,
-                 ITEM_UP_BY_ITEM, RESPECT_PIMMUNE, RESPECT_MIMMUNE, DEFENSE_ATT, DEFENSE_STATE, WATK, WDEF, MATK, MDEF,
-                 ACC, AVOID, SPEED, JUMP -> false;
+                    MESO_UP_BY_ITEM,
+                    ITEM_UP_BY_ITEM, RESPECT_PIMMUNE, RESPECT_MIMMUNE, DEFENSE_ATT, DEFENSE_STATE, WATK, WDEF, MATK,
+                    MDEF,
+                    ACC, AVOID, SPEED, JUMP ->
+                false;
             default -> true;
         };
     }
 
     private static boolean isPriorityBuffSourceId(int sourceId) {
-        return -ItemId.ROSE_SCENT == sourceId || -ItemId.FREESIA_SCENT == sourceId || -ItemId.LAVENDER_SCENT == sourceId;
+        return -ItemId.ROSE_SCENT == sourceId || -ItemId.FREESIA_SCENT == sourceId
+                || -ItemId.LAVENDER_SCENT == sourceId;
     }
 
     private void addItemEffectHolderCount(BuffStat stat) {
@@ -4077,8 +4189,10 @@ public class Character extends AbstractCharacterObject {
 
                     buffEffect.applyTo(Character.this);
                     sendPacket(PacketCreator.showOwnBuffEffect(beholder, 2));
-                    getMap().broadcastMessage(Character.this, PacketCreator.summonSkill(getId(), beholder, (int) (Math.random() * 3) + 6), true);
-                    getMap().broadcastMessage(Character.this, PacketCreator.showBuffEffect(getId(), beholder, 2), false);
+                    getMap().broadcastMessage(Character.this,
+                            PacketCreator.summonSkill(getId(), beholder, (int) (Math.random() * 3) + 6), true);
+                    getMap().broadcastMessage(Character.this, PacketCreator.showBuffEffect(getId(), beholder, 2),
+                            false);
                 }, buffInterval, buffInterval);
             }
         } else if (effect.isRecovery()) {
@@ -4127,7 +4241,7 @@ public class Character extends AbstractCharacterObject {
             chrLock.lock();
             try {
                 stopExtraTask();
-                startExtraTask(extraHpRec, extraMpRec, extraRecInterval);   // HP & MP sharing the same task holder
+                startExtraTask(extraHpRec, extraMpRec, extraRecInterval); // HP & MP sharing the same task holder
             } finally {
                 chrLock.unlock();
             }
@@ -4158,7 +4272,8 @@ public class Character extends AbstractCharacterObject {
                     BuffStatValueHolder statMbsvh = statup.getValue();
 
                     if (active) {
-                        if (mbsvh == null || mbsvh.value < statMbsvh.value || (mbsvh.value == statMbsvh.value && mbsvh.effect.getStatups().size() <= statMbsvh.effect.getStatups().size())) {
+                        if (mbsvh == null || mbsvh.value < statMbsvh.value || (mbsvh.value == statMbsvh.value
+                                && mbsvh.effect.getStatups().size() <= statMbsvh.effect.getStatups().size())) {
                             toDeploy.put(statup.getKey(), statMbsvh);
                         } else {
                             if (!isSingletonStatup(statup.getKey())) {
@@ -4289,7 +4404,8 @@ public class Character extends AbstractCharacterObject {
     public Collection<Door> getDoors() {
         prtLock.lock();
         try {
-            return (party != null ? Collections.unmodifiableCollection(party.getDoors().values()) : (pdoor != null ? Collections.singleton(pdoor) : new LinkedHashSet<>()));
+            return (party != null ? Collections.unmodifiableCollection(party.getDoors().values())
+                    : (pdoor != null ? Collections.singleton(pdoor) : new LinkedHashSet<>()));
         } finally {
             prtLock.unlock();
         }
@@ -4356,7 +4472,7 @@ public class Character extends AbstractCharacterObject {
         return ret;
     }
 
-    private void removePartyDoor(Party formerParty) {    // player is no longer registered at this party
+    private void removePartyDoor(Party formerParty) { // player is no longer registered at this party
         formerParty.removeDoor(id);
     }
 
@@ -4415,7 +4531,8 @@ public class Character extends AbstractCharacterObject {
 
             Set<Integer> exclItems = pe.getValue();
             if (!exclItems.isEmpty()) {
-                sendPacket(PacketCreator.loadExceptionList(this.getId(), pe.getKey(), petIndex, new ArrayList<>(exclItems)));
+                sendPacket(PacketCreator.loadExceptionList(this.getId(), pe.getKey(), petIndex,
+                        new ArrayList<>(exclItems)));
 
                 chrLock.lock();
                 try {
@@ -4437,7 +4554,8 @@ public class Character extends AbstractCharacterObject {
 
             Set<Integer> exclItems = pe.getValue();
             if (!exclItems.isEmpty()) {
-                c.sendPacket(PacketCreator.loadExceptionList(this.getId(), pe.getKey(), petIndex, new ArrayList<>(exclItems)));
+                c.sendPacket(PacketCreator.loadExceptionList(this.getId(), pe.getKey(), petIndex,
+                        new ArrayList<>(exclItems)));
             }
         }
     }
@@ -4473,7 +4591,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public float getExpRate() {
-        if (hasNoviceExpRate()) {   // base exp rate 1x for early levels idea thanks to Vcoc
+        if (hasNoviceExpRate()) { // base exp rate 1x for early levels idea thanks to Vcoc
             return 1;
         }
 
@@ -4481,16 +4599,19 @@ public class Character extends AbstractCharacterObject {
     }
 
     public float getLevelExpRate() {
-        if (hasNoviceExpRate()) return 1; // 新手经验保护
+        if (hasNoviceExpRate())
+            return 1; // 新手经验保护
 
         return 1f + GameConfig.getWorldFloat(getWorld(), "level_exp_rate") * level;
     }
 
     public float getQuickLevelExpRate() {
-        if (hasNoviceExpRate()) return 1; // 新手经验保护
+        if (hasNoviceExpRate())
+            return 1; // 新手经验保护
 
         int quickLv = GameConfig.getWorldInt(getWorld(), "quick_level");
-        if (level >= quickLv) return 1;
+        if (level >= quickLv)
+            return 1;
 
         return 1f + (quickLv - level) * GameConfig.getWorldFloat(getWorld(), "quick_level_exp_rate");
     }
@@ -4500,7 +4621,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public float getMobExpRate() {
-        if (mobExpRate <= 0) updateMobExpRate();
+        if (mobExpRate <= 0)
+            updateMobExpRate();
         return mobExpRate;
     }
 
@@ -4614,11 +4736,10 @@ public class Character extends AbstractCharacterObject {
         return null;
     }
 
-
     public static int getAccountIdByName(String name) {
         final int id;
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT accountid FROM characters WHERE name = ?")) {
+                PreparedStatement ps = con.prepareStatement("SELECT accountid FROM characters WHERE name = ?")) {
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -4636,7 +4757,7 @@ public class Character extends AbstractCharacterObject {
     public static int getIdByName(String name) {
         final int id;
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT id FROM characters WHERE name = ?")) {
+                PreparedStatement ps = con.prepareStatement("SELECT id FROM characters WHERE name = ?")) {
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -4654,7 +4775,7 @@ public class Character extends AbstractCharacterObject {
     public static String getNameById(int id) {
         final String name;
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT name FROM characters WHERE id = ?")) {
+                PreparedStatement ps = con.prepareStatement("SELECT name FROM characters WHERE id = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -4683,7 +4804,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public boolean haveWeddingRing() {
-        int[] rings = {ItemId.WEDDING_RING_STAR, ItemId.WEDDING_RING_MOONSTONE, ItemId.WEDDING_RING_GOLDEN, ItemId.WEDDING_RING_SILVER};
+        int[] rings = { ItemId.WEDDING_RING_STAR, ItemId.WEDDING_RING_MOONSTONE, ItemId.WEDDING_RING_GOLDEN,
+                ItemId.WEDDING_RING_SILVER };
 
         for (int ringid : rings) {
             if (haveItemWithId(ringid, true)) {
@@ -4803,12 +4925,13 @@ public class Character extends AbstractCharacterObject {
         int elapsedDays = 0;
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT `timestamp` FROM `fredstorage` WHERE `cid` = ?")) {
+                PreparedStatement ps = con.prepareStatement("SELECT `timestamp` FROM `fredstorage` WHERE `cid` = ?")) {
             ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    elapsedDays = FredrickProcessor.timestampElapsedDays(rs.getTimestamp(1), System.currentTimeMillis());
+                    elapsedDays = FredrickProcessor.timestampElapsedDays(rs.getTimestamp(1),
+                            System.currentTimeMillis());
                 }
             }
         } catch (SQLException e) {
@@ -4973,7 +5096,7 @@ public class Character extends AbstractCharacterObject {
 
     public void setGMLevel(int level) {
         this.gmLevel = Math.max(Math.min(level, 6), 0);
-        whiteChat = gmLevel >= 4;   // thanks ozanrijen for suggesting default white chat
+        whiteChat = gmLevel >= 4; // thanks ozanrijen for suggesting default white chat
     }
 
     public void closePartySearchInteractions() {
@@ -5181,7 +5304,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public boolean needQuestItem(int questid, int itemid) {
-        if (questid <= 0) { //For non quest items :3
+        if (questid <= 0) { // For non quest items :3
             return true;
         }
 
@@ -5342,10 +5465,11 @@ public class Character extends AbstractCharacterObject {
 
         try {
             Server.getInstance().memberLevelJobUpdate(this.mgc);
-            //Server.getInstance().getGuild(guildid, world, mgc).gainGP(40);
+            // Server.getInstance().getGuild(guildid, world, mgc).gainGP(40);
             int allianceId = getGuild().getAllianceId();
             if (allianceId > 0) {
-                Server.getInstance().allianceMessage(allianceId, GuildPackets.updateAllianceJobLevel(this), getId(), -1);
+                Server.getInstance().allianceMessage(allianceId, GuildPackets.updateAllianceJobLevel(this), getId(),
+                        -1);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -5353,7 +5477,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void handleEnergyChargeGain() { // to get here energychargelevel has to be > 0
-        Skill energycharge = isCygnus() ? SkillFactory.getSkill(ThunderBreaker.ENERGY_CHARGE) : SkillFactory.getSkill(Marauder.ENERGY_CHARGE);
+        Skill energycharge = isCygnus() ? SkillFactory.getSkill(ThunderBreaker.ENERGY_CHARGE)
+                : SkillFactory.getSkill(Marauder.ENERGY_CHARGE);
         StatEffect ceffect;
         ceffect = energycharge.getEffect(getSkillLevel(energycharge));
         TimerManager tMan = TimerManager.getInstance();
@@ -5362,7 +5487,8 @@ public class Character extends AbstractCharacterObject {
             if (energyBar > 10000) {
                 energyBar = 10000;
             }
-            List<Pair<BuffStat, Integer>> stat = Collections.singletonList(new Pair<>(BuffStat.ENERGY_CHARGE, energyBar));
+            List<Pair<BuffStat, Integer>> stat = Collections
+                    .singletonList(new Pair<>(BuffStat.ENERGY_CHARGE, energyBar));
             setBuffedValue(BuffStat.ENERGY_CHARGE, energyBar);
             sendPacket(PacketCreator.giveBuff(energyBar, 0, stat));
             sendPacket(PacketCreator.showOwnBuffEffect(energycharge.getId(), 2));
@@ -5375,7 +5501,8 @@ public class Character extends AbstractCharacterObject {
             final Character chr = this;
             tMan.schedule(() -> {
                 energyBar = 0;
-                List<Pair<BuffStat, Integer>> stat = Collections.singletonList(new Pair<>(BuffStat.ENERGY_CHARGE, energyBar));
+                List<Pair<BuffStat, Integer>> stat = Collections
+                        .singletonList(new Pair<>(BuffStat.ENERGY_CHARGE, energyBar));
                 setBuffedValue(BuffStat.ENERGY_CHARGE, energyBar);
                 sendPacket(PacketCreator.giveBuff(energyBar, 0, stat));
                 getMap().broadcastPacket(chr, PacketCreator.cancelForeignFirstDebuff(id, ((long) 1) << 50));
@@ -5388,7 +5515,8 @@ public class Character extends AbstractCharacterObject {
         Skill combo = SkillFactory.getSkill(skillid);
         List<Pair<BuffStat, Integer>> stat = Collections.singletonList(new Pair<>(BuffStat.COMBO, 1));
         setBuffedValue(BuffStat.COMBO, 1);
-        sendPacket(PacketCreator.giveBuff(skillid, combo.getEffect(getSkillLevel(combo)).getDuration() + (int) ((getBuffedStarttime(BuffStat.COMBO) - System.currentTimeMillis())), stat));
+        sendPacket(PacketCreator.giveBuff(skillid, combo.getEffect(getSkillLevel(combo)).getDuration()
+                + (int) ((getBuffedStarttime(BuffStat.COMBO) - System.currentTimeMillis())), stat));
         getMap().broadcastMessage(this, PacketCreator.giveForeignBuff(getId(), stat), false);
     }
 
@@ -5410,7 +5538,8 @@ public class Character extends AbstractCharacterObject {
         lastfametime = System.currentTimeMillis();
         lastmonthfameids.add(to.getId());
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("INSERT INTO famelog (characterid, characterid_to) VALUES (?, ?)")) {
+                PreparedStatement ps = con
+                        .prepareStatement("INSERT INTO famelog (characterid, characterid_to) VALUES (?, ?)")) {
             ps.setInt(1, getId());
             ps.setInt(2, to.getId());
             ps.executeUpdate();
@@ -5458,7 +5587,8 @@ public class Character extends AbstractCharacterObject {
         int seconds = (int) Math.floor((double) timeLeft / SECONDS.toMillis(1)) % 60;
         int minutes = (int) Math.floor((double) timeLeft / MINUTES.toMillis(1)) % 60;
 
-        return (minutes > 0 ? (String.format("%02d", minutes) + " minutes, ") : "") + String.format("%02d", seconds) + " seconds";
+        return (minutes > 0 ? (String.format("%02d", minutes) + " minutes, ") : "") + String.format("%02d", seconds)
+                + " seconds";
     }
 
     public boolean isBuffFrom(BuffStat stat, Skill skill) {
@@ -5511,7 +5641,7 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
-    public boolean isGuildLeader() {    // true on guild master or jr. master
+    public boolean isGuildLeader() { // true on guild master or jr. master
         return guildId > 0 && guildRank < 3;
     }
 
@@ -5563,7 +5693,7 @@ public class Character extends AbstractCharacterObject {
 
     private int getJobLevelSp(int level, Job job, int jobBranch) {
         if (Job.getJobStyleInternal(job.getId(), (byte) 0x40) == Job.MAGICIAN) {
-            level += 2;  // starts earlier, level 8
+            level += 2; // starts earlier, level 8
         }
 
         return 3 * level + GameConstants.getChangeJobSpUpgrade(jobBranch);
@@ -5658,7 +5788,8 @@ public class Character extends AbstractCharacterObject {
             addhp += Randomizer.rand(12, 16);
             addmp += Randomizer.rand(10, 12);
         } else if (job.isA(Job.WARRIOR) || job.isA(Job.DAWNWARRIOR1)) {
-            improvingMaxHP = isCygnus() ? SkillFactory.getSkill(DawnWarrior.MAX_HP_INCREASE) : SkillFactory.getSkill(Warrior.IMPROVED_MAXHP);
+            improvingMaxHP = isCygnus() ? SkillFactory.getSkill(DawnWarrior.MAX_HP_INCREASE)
+                    : SkillFactory.getSkill(Warrior.IMPROVED_MAXHP);
             if (job.isA(Job.CRUSADER)) {
                 improvingMaxMP = SkillFactory.getSkill(1210000);
             } else if (job.isA(Job.DAWNWARRIOR2)) {
@@ -5668,7 +5799,8 @@ public class Character extends AbstractCharacterObject {
             addhp += Randomizer.rand(24, 28);
             addmp += Randomizer.rand(4, 6);
         } else if (job.isA(Job.MAGICIAN) || job.isA(Job.BLAZEWIZARD1)) {
-            improvingMaxMP = isCygnus() ? SkillFactory.getSkill(BlazeWizard.INCREASING_MAX_MP) : SkillFactory.getSkill(Magician.IMPROVED_MAX_MP_INCREASE);
+            improvingMaxMP = isCygnus() ? SkillFactory.getSkill(BlazeWizard.INCREASING_MAX_MP)
+                    : SkillFactory.getSkill(Magician.IMPROVED_MAX_MP_INCREASE);
             improvingMaxMPLevel = getSkillLevel(improvingMaxMP);
             addhp += Randomizer.rand(10, 14);
             addmp += Randomizer.rand(22, 24);
@@ -5679,7 +5811,8 @@ public class Character extends AbstractCharacterObject {
             addhp += 30000;
             addmp += 30000;
         } else if (job.isA(Job.PIRATE) || job.isA(Job.THUNDERBREAKER1)) {
-            improvingMaxHP = isCygnus() ? SkillFactory.getSkill(ThunderBreaker.IMPROVE_MAX_HP) : SkillFactory.getSkill(Brawler.IMPROVE_MAX_HP);
+            improvingMaxHP = isCygnus() ? SkillFactory.getSkill(ThunderBreaker.IMPROVE_MAX_HP)
+                    : SkillFactory.getSkill(Brawler.IMPROVE_MAX_HP);
             improvingMaxHPLevel = getSkillLevel(improvingMaxHP);
             addhp += Randomizer.rand(22, 28);
             addmp += Randomizer.rand(18, 23);
@@ -5688,7 +5821,8 @@ public class Character extends AbstractCharacterObject {
             int aids = Randomizer.rand(4, 8);
             addmp += aids + (int) Math.floor(aids * 0.1);
         }
-        if (improvingMaxHPLevel > 0 && (job.isA(Job.WARRIOR) || job.isA(Job.PIRATE) || job.isA(Job.DAWNWARRIOR1) || job.isA(Job.THUNDERBREAKER1))) {
+        if (improvingMaxHPLevel > 0 && (job.isA(Job.WARRIOR) || job.isA(Job.PIRATE) || job.isA(Job.DAWNWARRIOR1)
+                || job.isA(Job.THUNDERBREAKER1))) {
             addhp += improvingMaxHP.getEffect(improvingMaxHPLevel).getX();
         }
         if (improvingMaxMPLevel > 0 && (job.isA(Job.MAGICIAN) || job.isA(Job.CRUSADER) || job.isA(Job.BLAZEWIZARD1))) {
@@ -5720,15 +5854,17 @@ public class Character extends AbstractCharacterObject {
             if (level == maxClassLevel) {
                 if (!this.isGM()) {
                     if (GameConfig.getServerBoolean("playernpc_auto_deploy")) {
-                        ThreadManager.getInstance().newTask(() -> PlayerNPC.spawnPlayerNPC(GameConstants.getHallOfFameMapid(job), Character.this));
+                        ThreadManager.getInstance().newTask(
+                                () -> PlayerNPC.spawnPlayerNPC(GameConstants.getHallOfFameMapid(job), Character.this));
                     }
 
                     final String names = (getMedalText() + name);
-                    getWorldServer().broadcastPacket(PacketCreator.serverNotice(6, String.format(ServerConstants.LEVEL_200, names, maxClassLevel, names)));
+                    getWorldServer().broadcastPacket(PacketCreator.serverNotice(6,
+                            String.format(ServerConstants.LEVEL_200, names, maxClassLevel, names)));
                 }
             }
 
-            level = maxClassLevel; //To prevent levels past the maximum
+            level = maxClassLevel; // To prevent levels past the maximum
         }
 
         levelUpGainSp();
@@ -5775,7 +5911,7 @@ public class Character extends AbstractCharacterObject {
                     this.yellowMessage(I18nUtil.getMessage("Character.levelUp.USE_ADD_SLOTS_BY_LEVEL", level));
                 }
             }
-            if (GameConfig.getServerBoolean("use_add_rates_by_level")) { //For the rate upgrade
+            if (GameConfig.getServerBoolean("use_add_rates_by_level")) { // For the rate upgrade
                 revertLastPlayerRates();
                 setPlayerRates();
                 this.yellowMessage(I18nUtil.getMessage("Character.levelUp.USE_ADD_RATES_BY_LEVEL", level));
@@ -5783,7 +5919,7 @@ public class Character extends AbstractCharacterObject {
         }
 
         if (GameConfig.getServerBoolean("use_perfect_pitch") && level >= 30) {
-            //milestones?
+            // milestones?
             if (InventoryManipulator.checkSpace(client, ItemId.PERFECT_PITCH, (short) 1, "")) {
                 InventoryManipulator.addById(client, ItemId.PERFECT_PITCH, (short) 1, "", -1);
             }
@@ -5801,7 +5937,7 @@ public class Character extends AbstractCharacterObject {
         if (familyEntry != null) {
             familyEntry.giveReputationToSenior(GameConfig.getServerInt("family_rep_per_level_up"), true);
             FamilyEntry senior = familyEntry.getSenior();
-            if (senior != null) { //only send the message to direct senior
+            if (senior != null) { // only send the message to direct senior
                 Character seniorChr = senior.getChr();
                 if (seniorChr != null) {
                     seniorChr.sendPacket(PacketCreator.levelUpMessage(1, level, getName()));
@@ -5869,7 +6005,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     private void applySavedRateOrElse(String type, Runnable runnable) {
-        ExtendValueDO extendValueDO = ExtendUtil.getExtendValue(String.valueOf(id), ExtendType.CHARACTER_EXTEND.getType(), type);
+        ExtendValueDO extendValueDO = ExtendUtil.getExtendValue(String.valueOf(id),
+                ExtendType.CHARACTER_EXTEND.getType(), type);
 
         if (extendValueDO == null) {
             runnable.run();
@@ -6114,7 +6251,7 @@ public class Character extends AbstractCharacterObject {
             ret.jobRank = rs.getInt("jobRank");
             ret.jobRankMove = rs.getInt("jobRankMove");
 
-            if (equipped != null) {  // players can have no equipped items at all, ofc
+            if (equipped != null) { // players can have no equipped items at all, ofc
                 Inventory inv = ret.inventory[InventoryType.EQUIPPED.ordinal()];
                 for (Item item : equipped) {
                     inv.addItemFromDB(item);
@@ -6180,7 +6317,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public int getRemainingSp() {
-        return getRemainingSp(job.getId()); //default
+        return getRemainingSp(job.getId()); // default
     }
 
     public void updateRemainingSp(int remainingSp) {
@@ -6265,10 +6402,11 @@ public class Character extends AbstractCharacterObject {
         chr.getInventory(InventoryType.ETC).setSlotLimit(charactersDO.getEtcslots());
         short sandboxCheck = 0x0;
         for (InventoryType inventoryType : InventoryType.values()) {
-            List<InventorySearchRtnDTO> searchRtnDTOList = inventoryService.getInventoryList(InventorySearchReqDTO.builder()
-                    .characterId(charactersDO.getId())
-                    .inventoryType(inventoryType.getType())
-                    .build());
+            List<InventorySearchRtnDTO> searchRtnDTOList = inventoryService
+                    .getInventoryList(InventorySearchReqDTO.builder()
+                            .characterId(charactersDO.getId())
+                            .inventoryType(inventoryType.getType())
+                            .build());
             for (InventorySearchRtnDTO searchRtnDTO : searchRtnDTOList) {
                 sandboxCheck |= searchRtnDTO.getFlag();
                 Item item = searchRtnDTO.toItem();
@@ -6278,7 +6416,8 @@ public class Character extends AbstractCharacterObject {
                     if (pet != null && pet.isSummoned()) {
                         chr.addPet(pet);
                         chr.resetExcluded(item.getPetId());
-                        inventoryService.getPetIgnoreByPetId(item.getPetId()).forEach(petignoresDO -> chr.addExcluded(petignoresDO.getPetid(), petignoresDO.getItemid()));
+                        inventoryService.getPetIgnoreByPetId(item.getPetId()).forEach(
+                                petignoresDO -> chr.addExcluded(petignoresDO.getPetid(), petignoresDO.getItemid()));
                     }
                     continue;
                 }
@@ -6309,7 +6448,8 @@ public class Character extends AbstractCharacterObject {
         }
         NewYearCardRecord.loadPlayerNewYearCards(chr);
 
-        List<TrocklocationsDO> trocklocationsDOList = characterService.getTrockLocationByCharacter(charactersDO.getId());
+        List<TrocklocationsDO> trocklocationsDOList = characterService
+                .getTrockLocationByCharacter(charactersDO.getId());
         int vip = 0;
         int reg = 0;
         for (int i = 0; i < 15; i++) {
@@ -6334,15 +6474,18 @@ public class Character extends AbstractCharacterObject {
 
         AccountsDO accountsDO = accountService.findById(charactersDO.getAccountid());
         chr.getClient().setAccountName(accountsDO.getName());
-        chr.getClient().setCharacterSlots(Optional.ofNullable(accountsDO.getCharacterslots()).map(Integer::byteValue).orElse((byte) 0));
+        chr.getClient().setCharacterSlots(
+                Optional.ofNullable(accountsDO.getCharacterslots()).map(Integer::byteValue).orElse((byte) 0));
         chr.getClient().setLanguage(accountsDO.getLanguage());
 
         List<AreaInfoDO> areaInfoDOList = characterService.getAreaInfoByCharacter(charactersDO.getId());
-        areaInfoDOList.forEach(areaInfoDO -> chr.getAreaInfos().put(Optional.ofNullable(areaInfoDO.getArea()).map(Integer::shortValue).orElse((short) 0),
+        areaInfoDOList.forEach(areaInfoDO -> chr.getAreaInfos().put(
+                Optional.ofNullable(areaInfoDO.getArea()).map(Integer::shortValue).orElse((short) 0),
                 areaInfoDO.getInfo()));
 
         List<EventstatsDO> eventstatsDOList = characterService.getEventStatsByCharacter(charactersDO.getId());
-        eventstatsDOList.forEach(eventstatsDO -> chr.getEvents().put(eventstatsDO.getName(), new RescueGaga(Optional.ofNullable(eventstatsDO.getInfo()).orElse(0))));
+        eventstatsDOList.forEach(eventstatsDO -> chr.getEvents().put(eventstatsDO.getName(),
+                new RescueGaga(Optional.ofNullable(eventstatsDO.getInfo()).orElse(0))));
 
         chr.setCashShop(new CashShop(charactersDO.getAccountid(), charactersDO.getId(), chr.getJobType()));
         chr.setAutoBanManager(new AutobanManager(chr));
@@ -6358,7 +6501,8 @@ public class Character extends AbstractCharacterObject {
 
         int mountId = chr.getJobType() * 10000000 + 1004;
         if (chr.getInventory(InventoryType.EQUIPPED).getItem((short) -18) != null) {
-            chr.setMapleMount(new Mount(chr, chr.getInventory(InventoryType.EQUIPPED).getItem((short) -18).getItemId(), mountId));
+            chr.setMapleMount(
+                    new Mount(chr, chr.getInventory(InventoryType.EQUIPPED).getItem((short) -18).getItemId(), mountId));
         } else {
             chr.setMapleMount(new Mount(chr, 0, mountId));
         }
@@ -6423,7 +6567,8 @@ public class Character extends AbstractCharacterObject {
         }
         cdo.setMeso(chr.getMeso());
         cdo.setHpMpUsed(chr.getHpMpApUsed());
-        if (chr.getMap() == null || chr.getMap().getId() == MapId.CRIMSONWOOD_VALLEY_1 || chr.getMap().getId() == MapId.CRIMSONWOOD_VALLEY_2) {
+        if (chr.getMap() == null || chr.getMap().getId() == MapId.CRIMSONWOOD_VALLEY_1
+                || chr.getMap().getId() == MapId.CRIMSONWOOD_VALLEY_2) {
             cdo.setSpawnpoint(0);
         } else {
             Portal closest = chr.getMap().findClosestPlayerSpawnpoint(chr.getPosition());
@@ -6522,8 +6667,10 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void raiseQuestMobCount(int id) {
-        // It seems nexon uses monsters that don't exist in the WZ (except string) to merge multiple mobs together for these 3 monsters.
-        // We also want to run mobKilled for both since there are some quest that don't use the updated ID...
+        // It seems nexon uses monsters that don't exist in the WZ (except string) to
+        // merge multiple mobs together for these 3 monsters.
+        // We also want to run mobKilled for both since there are some quest that don't
+        // use the updated ID...
         if (id == MobId.GREEN_MUSHROOM || id == MobId.DEJECTED_GREEN_MUSHROOM) {
             raiseQuestMobCount(MobId.GREEN_MUSHROOM_QUEST);
         } else if (id == MobId.ZOMBIE_MUSHROOM || id == MobId.ANNOYED_ZOMBIE_MUSHROOM) {
@@ -6579,7 +6726,7 @@ public class Character extends AbstractCharacterObject {
         if (eim != null) {
             eim.playerKilled(this);
         }
-        int[] charmID = {ItemId.SAFETY_CHARM, ItemId.EASTER_BASKET, ItemId.EASTER_CHARM};
+        int[] charmID = { ItemId.SAFETY_CHARM, ItemId.EASTER_BASKET, ItemId.EASTER_CHARM };
         int possesed = 0;
         int i;
         for (i = 0; i < charmID.length; i++) {
@@ -6590,17 +6737,21 @@ public class Character extends AbstractCharacterObject {
             }
         }
         if (possesed > 0 && !MapId.isDojo(getMapId())) {
-            message(I18nUtil.getLogMessage("Character.useItem.message1"));  //使用安全护符，不扣经验
-            InventoryManipulator.removeById(client, ItemConstants.getInventoryType(charmID[i]), charmID[i], 1, true, false);
+            message(I18nUtil.getLogMessage("Character.useItem.message1")); // 使用安全护符，不扣经验
+            InventoryManipulator.removeById(client, ItemConstants.getInventoryType(charmID[i]), charmID[i], 1, true,
+                    false);
             usedSafetyCharm = true;
-        } else if (getJob() != Job.BEGINNER) { //Hmm...
-            if (!FieldLimit.NO_EXP_DECREASE.check(getMap().getFieldLimit())) {  // thanks Conrad for noticing missing FieldLimit check
+        } else if (getJob() != Job.BEGINNER) { // Hmm...
+            if (!FieldLimit.NO_EXP_DECREASE.check(getMap().getFieldLimit())) { // thanks Conrad for noticing missing
+                                                                               // FieldLimit check
                 int XPdummy = ExpTable.getExpNeededForLevel(getLevel());
 
-                if (getMap().isTown()) {    // thanks MindLove, SIayerMonkey, HaItsNotOver for noting players only lose 1% on town maps
+                if (getMap().isTown()) { // thanks MindLove, SIayerMonkey, HaItsNotOver for noting players only lose 1%
+                                         // on town maps
                     XPdummy /= 100;
                 } else {
-                    if (getLuk() < 50) {    // thanks Taiketo, Quit, Fishanelli for noting player EXP loss are fixed, 50-LUK threshold
+                    if (getLuk() < 50) { // thanks Taiketo, Quit, Fishanelli for noting player EXP loss are fixed,
+                                         // 50-LUK threshold
                         XPdummy /= 10;
                     } else {
                         XPdummy /= 20;
@@ -6648,13 +6799,13 @@ public class Character extends AbstractCharacterObject {
 
     public void sitChair(int itemId) {
         if (this.isLoggedInWorld()) {
-            if (itemId >= 1000000) {    // sit on item chair
+            if (itemId >= 1000000) { // sit on item chair
                 if (chair.get() < 0) {
                     setChair(itemId);
                     getMap().broadcastMessage(this, PacketCreator.showChair(this.getId(), itemId), false);
                 }
                 enableActions();
-            } else if (itemId >= 0) {    // sit on map chair
+            } else if (itemId >= 0) { // sit on map chair
                 if (chair.get() < 0) {
                     setChair(itemId);
                     if (registerChairBuff()) {
@@ -6662,7 +6813,7 @@ public class Character extends AbstractCharacterObject {
                     }
                     sendPacket(PacketCreator.cancelChair(itemId));
                 }
-            } else {    // stand up
+            } else { // stand up
                 unsitChairInternal();
             }
         }
@@ -6673,18 +6824,19 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void respawn(int returnMap) {
-        respawn(null, returnMap);    // unspecified EIM, don't force EIM unregister in this case
+        respawn(null, returnMap); // unspecified EIM, don't force EIM unregister in this case
     }
 
     public void respawn(EventInstanceManager eim, int returnMap) {
         if (eim != null) {
-            eim.unregisterPlayer(this);    // some event scripts uses this...
+            eim.unregisterPlayer(this); // some event scripts uses this...
         }
         changeMap(returnMap);
 
-        cancelAllBuffs(false);  // thanks Oblivium91 for finding out players still could revive in area and take damage before returning to town
+        cancelAllBuffs(false); // thanks Oblivium91 for finding out players still could revive in area and take
+                               // damage before returning to town
 
-        if (usedSafetyCharm) {  // thanks kvmba for noticing safety charm not providing 30% HP/MP
+        if (usedSafetyCharm) { // thanks kvmba for noticing safety charm not providing 30% HP/MP
             addMPHP((int) Math.ceil(this.getClientMaxHp() * 0.3), (int) Math.ceil(this.getClientMaxMp() * 0.3));
         } else {
             updateHp(50);
@@ -6704,7 +6856,8 @@ public class Character extends AbstractCharacterObject {
 
             addHP(-bloodEffect.getX());
             sendPacket(PacketCreator.showOwnBuffEffect(bloodEffect.getSourceId(), 5));
-            getMap().broadcastMessage(Character.this, PacketCreator.showBuffEffect(getId(), bloodEffect.getSourceId(), 5), false);
+            getMap().broadcastMessage(Character.this,
+                    PacketCreator.showBuffEffect(getId(), bloodEffect.getSourceId(), 5), false);
         }, 4000, 4000);
     }
 
@@ -6718,8 +6871,8 @@ public class Character extends AbstractCharacterObject {
             equipluk = 0;
             equipmagic = 0;
             equipwatk = 0;
-            //equipspeed = 0;
-            //equipjump = 0;
+            // equipspeed = 0;
+            // equipjump = 0;
 
             for (Item item : getInventory(InventoryType.EQUIPPED)) {
                 Equip equip = (Equip) item;
@@ -6731,8 +6884,8 @@ public class Character extends AbstractCharacterObject {
                 equipluk += equip.getLuk();
                 equipmagic += equip.getMatk() + equip.getInt();
                 equipwatk += equip.getWatk();
-                //equipspeed += equip.getSpeed();
-                //equipjump += equip.getJump();
+                // equipspeed += equip.getSpeed();
+                // equipjump += equip.getJump();
             }
 
             equipchanged = false;
@@ -6785,7 +6938,8 @@ public class Character extends AbstractCharacterObject {
             }
 
             if (energyBar == 15000) {
-                Skill energycharge = isCygnus() ? SkillFactory.getSkill(ThunderBreaker.ENERGY_CHARGE) : SkillFactory.getSkill(Marauder.ENERGY_CHARGE);
+                Skill energycharge = isCygnus() ? SkillFactory.getSkill(ThunderBreaker.ENERGY_CHARGE)
+                        : SkillFactory.getSkill(Marauder.ENERGY_CHARGE);
                 StatEffect ceffect = energycharge.getEffect(getSkillLevel(energycharge));
                 localwatk += ceffect.getWatk();
             }
@@ -6822,15 +6976,15 @@ public class Character extends AbstractCharacterObject {
             }
 
             /*
-            Integer speedbuff = getBuffedValue(BuffStat.SPEED);
-            if (speedbuff != null) {
-                localspeed += speedbuff.intValue();
-            }
-            Integer jumpbuff = getBuffedValue(BuffStat.JUMP);
-            if (jumpbuff != null) {
-                localjump += jumpbuff.intValue();
-            }
-            */
+             * Integer speedbuff = getBuffedValue(BuffStat.SPEED);
+             * if (speedbuff != null) {
+             * localspeed += speedbuff.intValue();
+             * }
+             * Integer jumpbuff = getBuffedValue(BuffStat.JUMP);
+             * if (jumpbuff != null) {
+             * localjump += jumpbuff.intValue();
+             * }
+             */
 
             int blessing = getSkillLevel(10000000 * getJobType() + 12);
             if (blessing > 0) {
@@ -6838,7 +6992,8 @@ public class Character extends AbstractCharacterObject {
                 localmagic += blessing * 2;
             }
 
-            if (job.isA(Job.THIEF) || job.isA(Job.BOWMAN) || job.isA(Job.PIRATE) || job.isA(Job.NIGHTWALKER1) || job.isA(Job.WINDARCHER1)) {
+            if (job.isA(Job.THIEF) || job.isA(Job.BOWMAN) || job.isA(Job.PIRATE) || job.isA(Job.NIGHTWALKER1)
+                    || job.isA(Job.WINDARCHER1)) {
                 Item weapon_item = getInventory(InventoryType.EQUIPPED).getItem((short) -11);
                 if (weapon_item != null) {
                     ItemInformationProvider ii = ItemInformationProvider.getInstance();
@@ -6935,7 +7090,8 @@ public class Character extends AbstractCharacterObject {
                 sendPacket(PacketCreator.updatePlayerStats(hpmpupdate, true, this));
             }
 
-            if (oldmaxhp != localMaxHp) {   // thanks Wh1SK3Y (Suwaidy) for pointing out a deadlock occuring related to party members HP
+            if (oldmaxhp != localMaxHp) { // thanks Wh1SK3Y (Suwaidy) for pointing out a deadlock occuring related to
+                                          // party members HP
                 updatePartyMemberHP();
             }
         } finally {
@@ -6950,7 +7106,8 @@ public class Character extends AbstractCharacterObject {
         try {
             if (party != null) {
                 for (Character partychar : this.getPartyMembersOnSameMap()) {
-                    sendPacket(PacketCreator.updatePartyMemberHP(partychar.getId(), partychar.getHp(), partychar.getCurrentMaxHp()));
+                    sendPacket(PacketCreator.updatePartyMemberHP(partychar.getId(), partychar.getHp(),
+                            partychar.getCurrentMaxHp()));
                 }
             }
         } finally {
@@ -7075,7 +7232,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void resetBattleshipHp() {
-        int bshipLevel = Math.max(getLevel() - 120, 0);  // thanks alex12 for noticing battleship HP issues for low-level players
+        int bshipLevel = Math.max(getLevel() - 120, 0); // thanks alex12 for noticing battleship HP issues for low-level
+                                                        // players
         this.battleshipHp = 400 * getSkillLevel(SkillFactory.getSkill(Corsair.BATTLE_SHIP)) + (bshipLevel * 200);
     }
 
@@ -7101,7 +7259,8 @@ public class Character extends AbstractCharacterObject {
         if (!listcd.isEmpty()) {
             try (Connection con = DatabaseConnection.getConnection()) {
                 deleteWhereCharacterId(con, "DELETE FROM cooldowns WHERE charid = ?");
-                try (PreparedStatement ps = con.prepareStatement("INSERT INTO cooldowns (charid, SkillID, StartTime, length) VALUES (?, ?, ?, ?)")) {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO cooldowns (charid, SkillID, StartTime, length) VALUES (?, ?, ?, ?)")) {
                     ps.setInt(1, getId());
                     for (PlayerCoolDownValueHolder cooling : listcd) {
                         ps.setInt(2, cooling.skillId);
@@ -7120,7 +7279,8 @@ public class Character extends AbstractCharacterObject {
         if (!listds.isEmpty()) {
             try (Connection con = DatabaseConnection.getConnection()) {
                 deleteWhereCharacterId(con, "DELETE FROM playerdiseases WHERE charid = ?");
-                try (PreparedStatement ps = con.prepareStatement("INSERT INTO playerdiseases (charid, disease, mobskillid, mobskilllv, length) VALUES (?, ?, ?, ?, ?)")) {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO playerdiseases (charid, disease, mobskillid, mobskilllv, length) VALUES (?, ?, ?, ?, ?)")) {
                     ps.setInt(1, getId());
 
                     for (Entry<Disease, Pair<Long, MobSkill>> e : listds.entrySet()) {
@@ -7144,7 +7304,8 @@ public class Character extends AbstractCharacterObject {
 
     public void saveGuildStatus() {
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("UPDATE characters SET guildid = ?, guildrank = ?, allianceRank = ? WHERE id = ?")) {
+                PreparedStatement ps = con.prepareStatement(
+                        "UPDATE characters SET guildid = ?, guildrank = ?, allianceRank = ? WHERE id = ?")) {
             ps.setInt(1, guildId);
             ps.setInt(2, guildRank);
             ps.setInt(3, allianceRank);
@@ -7155,7 +7316,7 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
-    public void saveLocationOnWarp() {  // suggestion to remember the map before warp command thanks to Lei
+    public void saveLocationOnWarp() { // suggestion to remember the map before warp command thanks to Lei
         Portal closest = map.findClosestPortal(getPosition());
         int curMapid = getMapId();
 
@@ -7168,7 +7329,8 @@ public class Character extends AbstractCharacterObject {
 
     public void saveLocation(String type) {
         Portal closest = map.findClosestPortal(getPosition());
-        savedLocations[SavedLocationType.fromString(type).ordinal()] = new SavedLocation(getMapId(), closest != null ? closest.getId() : 0);
+        savedLocations[SavedLocationType.fromString(type).ordinal()] = new SavedLocation(getMapId(),
+                closest != null ? closest.getId() : 0);
     }
 
     public final boolean insertNewChar(CharacterFactoryRecipe recipe) {
@@ -7199,14 +7361,15 @@ public class Character extends AbstractCharacterObject {
 
         this.events.put("rescueGaga", new RescueGaga(0));
 
-
         try (Connection con = DatabaseConnection.getConnection()) {
             con.setAutoCommit(false);
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
             try {
                 // Character info
-                try (PreparedStatement ps = con.prepareStatement("INSERT INTO characters (str, dex, luk, `int`, gm, skincolor, gender, job, hair, face, map, meso, spawnpoint, accountid, name, world, hp, mp, maxhp, maxmp, level, ap, sp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO characters (str, dex, luk, `int`, gm, skincolor, gender, job, hair, face, map, meso, spawnpoint, accountid, name, world, hp, mp, maxhp, maxmp, level, ap, sp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS)) {
                     ps.setInt(1, attrStr);
                     ps.setInt(2, attrDex);
                     ps.setInt(3, attrLuk);
@@ -7270,7 +7433,8 @@ public class Character extends AbstractCharacterObject {
                 }
 
                 // Key config
-                try (PreparedStatement ps = con.prepareStatement("INSERT INTO keymap (characterid, `key`, `type`, `action`) VALUES (?, ?, ?, ?)")) {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO keymap (characterid, `key`, `type`, `action`) VALUES (?, ?, ?, ?)")) {
                     ps.setInt(1, id);
                     for (int i = 0; i < selectedKey.length; i++) {
                         ps.setInt(2, selectedKey[i]);
@@ -7281,12 +7445,14 @@ public class Character extends AbstractCharacterObject {
                 }
 
                 // No quickslots, or no change.
-                boolean bQuickslotEquals = this.quickSlotKeyMapped == null || (this.quickSlotLoaded != null && Arrays.equals(this.quickSlotKeyMapped.GetKeybindings(), this.quickSlotLoaded));
+                boolean bQuickslotEquals = this.quickSlotKeyMapped == null || (this.quickSlotLoaded != null
+                        && Arrays.equals(this.quickSlotKeyMapped.GetKeybindings(), this.quickSlotLoaded));
                 if (!bQuickslotEquals) {
                     long nQuickslotKeymapped = NumberTool.BytesToLong(this.quickSlotKeyMapped.GetKeybindings());
 
                     // Quickslot key config
-                    try (PreparedStatement ps = con.prepareStatement("INSERT INTO quickslotkeymapped (accountid, keymap) VALUES (?, ?) ON DUPLICATE KEY UPDATE keymap = ?;")) {
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "INSERT INTO quickslotkeymapped (accountid, keymap) VALUES (?, ?) ON DUPLICATE KEY UPDATE keymap = ?;")) {
                         ps.setInt(1, this.getAccountId());
                         ps.setLong(2, nQuickslotKeymapped);
                         ps.setLong(3, nQuickslotKeymapped);
@@ -7305,7 +7471,8 @@ public class Character extends AbstractCharacterObject {
 
                 if (!skills.isEmpty()) {
                     // Skills
-                    try (PreparedStatement ps = con.prepareStatement("INSERT INTO skills (characterid, skillid, skilllevel, masterlevel, expiration) VALUES (?, ?, ?, ?, ?)")) {
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "INSERT INTO skills (characterid, skillid, skilllevel, masterlevel, expiration) VALUES (?, ?, ?, ?, ?)")) {
                         ps.setInt(1, id);
                         for (Entry<Skill, SkillEntry> skill : skills.entrySet()) {
                             ps.setInt(2, skill.getKey().getId());
@@ -7338,20 +7505,23 @@ public class Character extends AbstractCharacterObject {
         if (GameConfig.getServerBoolean("use_autosave")) {
             Runnable r = () -> saveCharToDB(true);
 
-            CharacterSaveService service = (CharacterSaveService) getWorldServer().getServiceAccess(WorldServices.SAVE_CHARACTER);
+            CharacterSaveService service = (CharacterSaveService) getWorldServer()
+                    .getServiceAccess(WorldServices.SAVE_CHARACTER);
             service.registerSaveCharacter(this.getId(), r);
         } else {
             saveCharToDB(true);
         }
     }
 
-    //ItemFactory saveItems and monsterbook.saveCards are the most time consuming here.
+    // ItemFactory saveItems and monsterbook.saveCards are the most time consuming
+    // here.
     public synchronized void saveCharToDB(boolean notAutosave) {
         if (!loggedIn) {
             return;
         }
 
-        log.info(I18nUtil.getLogMessage(notAutosave ? "Character.saveCharToDB.info1" : "Character.saveCharToDB.info2"), name);
+        log.info(I18nUtil.getLogMessage(notAutosave ? "Character.saveCharToDB.info1" : "Character.saveCharToDB.info2"),
+                name);
 
         Server.getInstance().updateCharacterEntry(this);
 
@@ -7360,8 +7530,11 @@ public class Character extends AbstractCharacterObject {
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
             try {
-                try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, gachaexp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, map = ?, meso = ?, hpMpUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, mountlevel = ?, mountexp = ?, mounttiredness= ?, equipslots = ?, useslots = ?, setupslots = ?, etcslots = ?,  monsterbookcover = ?, vanquisherStage = ?, dojoPoints = ?, lastDojoStage = ?, finishedDojoTutorial = ?, vanquisherKills = ?, matchcardwins = ?, matchcardlosses = ?, matchcardties = ?, omokwins = ?, omoklosses = ?, omokties = ?, dataString = ?, fquest = ?, jailexpire = ?, partnerId = ?, marriageItemId = ?, lastExpGainTime = ?, ariantPoints = ?, partySearch = ? WHERE id = ?", Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setInt(1, level);    // thanks CanIGetaPR for noticing an unnecessary "level" limitation when persisting DB data
+                try (PreparedStatement ps = con.prepareStatement(
+                        "UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, gachaexp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, map = ?, meso = ?, hpMpUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, mountlevel = ?, mountexp = ?, mounttiredness= ?, equipslots = ?, useslots = ?, setupslots = ?, etcslots = ?,  monsterbookcover = ?, vanquisherStage = ?, dojoPoints = ?, lastDojoStage = ?, finishedDojoTutorial = ?, vanquisherKills = ?, matchcardwins = ?, matchcardlosses = ?, matchcardties = ?, omokwins = ?, omoklosses = ?, omokties = ?, dataString = ?, fquest = ?, jailexpire = ?, partnerId = ?, marriageItemId = ?, lastExpGainTime = ?, ariantPoints = ?, partySearch = ? WHERE id = ?",
+                        Statement.RETURN_GENERATED_KEYS)) {
+                    ps.setInt(1, level); // thanks CanIGetaPR for noticing an unnecessary "level" limitation when
+                                         // persisting DB data
                     ps.setInt(2, fame);
 
                     effLock.lock();
@@ -7409,7 +7582,8 @@ public class Character extends AbstractCharacterObject {
                     }
                     ps.setInt(22, meso.get());
                     ps.setInt(23, hpMpApUsed);
-                    if (map == null || map.getId() == MapId.CRIMSONWOOD_VALLEY_1 || map.getId() == MapId.CRIMSONWOOD_VALLEY_2) {  // reset to first spawnpoint on those maps
+                    if (map == null || map.getId() == MapId.CRIMSONWOOD_VALLEY_1
+                            || map.getId() == MapId.CRIMSONWOOD_VALLEY_2) { // reset to first spawnpoint on those maps
                         ps.setInt(24, 0);
                     } else {
                         Portal closest = map.findClosestPlayerSpawnpoint(getPosition());
@@ -7498,13 +7672,14 @@ public class Character extends AbstractCharacterObject {
                     pet.saveToDb();
                 }
 
-                for (Entry<Integer, Set<Integer>> es : getExcluded().entrySet()) {    // this set is already protected
+                for (Entry<Integer, Set<Integer>> es : getExcluded().entrySet()) { // this set is already protected
                     try (PreparedStatement psIgnore = con.prepareStatement("DELETE FROM petignores WHERE petid=?")) {
                         psIgnore.setInt(1, es.getKey());
                         psIgnore.executeUpdate();
                     }
 
-                    try (PreparedStatement psIgnore = con.prepareStatement("INSERT INTO petignores (petid, itemid) VALUES (?, ?)")) {
+                    try (PreparedStatement psIgnore = con
+                            .prepareStatement("INSERT INTO petignores (petid, itemid) VALUES (?, ?)")) {
                         psIgnore.setInt(1, es.getKey());
                         for (Integer x : es.getValue()) {
                             psIgnore.setInt(2, x);
@@ -7516,7 +7691,8 @@ public class Character extends AbstractCharacterObject {
 
                 // Key config
                 deleteWhereCharacterId(con, "DELETE FROM keymap WHERE characterid = ?");
-                try (PreparedStatement psKey = con.prepareStatement("INSERT INTO keymap (characterid, `key`, `type`, `action`) VALUES (?, ?, ?, ?)")) {
+                try (PreparedStatement psKey = con.prepareStatement(
+                        "INSERT INTO keymap (characterid, `key`, `type`, `action`) VALUES (?, ?, ?, ?)")) {
                     psKey.setInt(1, id);
 
                     Set<Entry<Integer, KeyBinding>> keybindingItems = Collections.unmodifiableSet(keymap.entrySet());
@@ -7530,11 +7706,13 @@ public class Character extends AbstractCharacterObject {
                 }
 
                 // No quickslots, or no change.
-                boolean bQuickslotEquals = this.quickSlotKeyMapped == null || (this.quickSlotLoaded != null && Arrays.equals(this.quickSlotKeyMapped.GetKeybindings(), this.quickSlotLoaded));
+                boolean bQuickslotEquals = this.quickSlotKeyMapped == null || (this.quickSlotLoaded != null
+                        && Arrays.equals(this.quickSlotKeyMapped.GetKeybindings(), this.quickSlotLoaded));
                 if (!bQuickslotEquals) {
                     long nQuickslotKeymapped = NumberTool.BytesToLong(this.quickSlotKeyMapped.GetKeybindings());
 
-                    try (final PreparedStatement psQuick = con.prepareStatement("INSERT INTO quickslotkeymapped (accountid, keymap) VALUES (?, ?) ON DUPLICATE KEY UPDATE keymap = ?;")) {
+                    try (final PreparedStatement psQuick = con.prepareStatement(
+                            "INSERT INTO quickslotkeymapped (accountid, keymap) VALUES (?, ?) ON DUPLICATE KEY UPDATE keymap = ?;")) {
                         psQuick.setInt(1, this.getAccountId());
                         psQuick.setLong(2, nQuickslotKeymapped);
                         psQuick.setLong(3, nQuickslotKeymapped);
@@ -7544,7 +7722,8 @@ public class Character extends AbstractCharacterObject {
 
                 // Skill macros
                 deleteWhereCharacterId(con, "DELETE FROM skillmacros WHERE characterid = ?");
-                try (PreparedStatement psMacro = con.prepareStatement("INSERT INTO skillmacros (characterid, skill1, skill2, skill3, name, shout, position) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                try (PreparedStatement psMacro = con.prepareStatement(
+                        "INSERT INTO skillmacros (characterid, skill1, skill2, skill3, name, shout, position) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
                     psMacro.setInt(1, getId());
                     for (int i = 0; i < 5; i++) {
                         SkillMacro macro = skillMacros[i];
@@ -7572,7 +7751,8 @@ public class Character extends AbstractCharacterObject {
                 ItemFactory.INVENTORY.saveItems(itemsWithType, id, con);
 
                 // Skills
-                try (PreparedStatement psSkill = con.prepareStatement("REPLACE INTO skills (characterid, skillid, skilllevel, masterlevel, expiration) VALUES (?, ?, ?, ?, ?)")) {
+                try (PreparedStatement psSkill = con.prepareStatement(
+                        "REPLACE INTO skills (characterid, skillid, skilllevel, masterlevel, expiration) VALUES (?, ?, ?, ?, ?)")) {
                     psSkill.setInt(1, id);
                     for (Entry<Skill, SkillEntry> skill : skills.entrySet()) {
                         psSkill.setInt(2, skill.getKey().getId());
@@ -7586,7 +7766,8 @@ public class Character extends AbstractCharacterObject {
 
                 // Saved locations
                 deleteWhereCharacterId(con, "DELETE FROM savedlocations WHERE characterid = ?");
-                try (PreparedStatement psLoc = con.prepareStatement("INSERT INTO savedlocations (characterid, `locationtype`, `map`, `portal`) VALUES (?, ?, ?, ?)")) {
+                try (PreparedStatement psLoc = con.prepareStatement(
+                        "INSERT INTO savedlocations (characterid, `locationtype`, `map`, `portal`) VALUES (?, ?, ?, ?)")) {
                     psLoc.setInt(1, id);
                     for (SavedLocationType savedLocationType : SavedLocationType.values()) {
                         if (savedLocations[savedLocationType.ordinal()] != null) {
@@ -7602,7 +7783,8 @@ public class Character extends AbstractCharacterObject {
                 deleteWhereCharacterId(con, "DELETE FROM trocklocations WHERE characterid = ?");
 
                 // Vip teleport rocks
-                try (PreparedStatement psVip = con.prepareStatement("INSERT INTO trocklocations(characterid, mapid, vip) VALUES (?, ?, 0)")) {
+                try (PreparedStatement psVip = con
+                        .prepareStatement("INSERT INTO trocklocations(characterid, mapid, vip) VALUES (?, ?, 0)")) {
                     for (int i = 0; i < getTrockSize(); i++) {
                         if (trockmaps.get(i) != MapId.NONE) {
                             psVip.setInt(1, getId());
@@ -7614,7 +7796,8 @@ public class Character extends AbstractCharacterObject {
                 }
 
                 // Regular teleport rocks
-                try (PreparedStatement psReg = con.prepareStatement("INSERT INTO trocklocations(characterid, mapid, vip) VALUES (?, ?, 1)")) {
+                try (PreparedStatement psReg = con
+                        .prepareStatement("INSERT INTO trocklocations(characterid, mapid, vip) VALUES (?, ?, 1)")) {
                     for (int i = 0; i < getVipTrockSize(); i++) {
                         if (viptrockmaps.get(i) != MapId.NONE) {
                             psReg.setInt(1, getId());
@@ -7627,7 +7810,8 @@ public class Character extends AbstractCharacterObject {
 
                 // Buddy
                 deleteWhereCharacterId(con, "DELETE FROM buddies WHERE characterid = ? AND pending = 0");
-                try (PreparedStatement psBuddy = con.prepareStatement("INSERT INTO buddies (characterid, `buddyid`, `pending`, `group`) VALUES (?, ?, 0, ?)")) {
+                try (PreparedStatement psBuddy = con.prepareStatement(
+                        "INSERT INTO buddies (characterid, `buddyid`, `pending`, `group`) VALUES (?, ?, 0, ?)")) {
                     psBuddy.setInt(1, id);
 
                     for (BuddylistEntry entry : buddylist.getBuddies()) {
@@ -7642,7 +7826,8 @@ public class Character extends AbstractCharacterObject {
 
                 // Area info
                 deleteWhereCharacterId(con, "DELETE FROM area_info WHERE charid = ?");
-                try (PreparedStatement psArea = con.prepareStatement("INSERT INTO area_info (id, charid, area, info) VALUES (DEFAULT, ?, ?, ?)")) {
+                try (PreparedStatement psArea = con
+                        .prepareStatement("INSERT INTO area_info (id, charid, area, info) VALUES (DEFAULT, ?, ?, ?)")) {
                     psArea.setInt(1, id);
 
                     for (Entry<Short, String> area : area_info.entrySet()) {
@@ -7655,7 +7840,8 @@ public class Character extends AbstractCharacterObject {
 
                 // Event stats
                 deleteWhereCharacterId(con, "DELETE FROM eventstats WHERE characterid = ?");
-                try (PreparedStatement psEvent = con.prepareStatement("INSERT INTO eventstats (characterid, name, info) VALUES (?, ?, ?)")) {
+                try (PreparedStatement psEvent = con
+                        .prepareStatement("INSERT INTO eventstats (characterid, name, info) VALUES (?, ?, ?)")) {
                     psEvent.setInt(1, id);
 
                     for (Map.Entry<String, Events> entry : events.entrySet()) {
@@ -7670,9 +7856,13 @@ public class Character extends AbstractCharacterObject {
                 deleteQuestProgressWhereCharacterId(con, id);
 
                 // Quests and medals
-                try (PreparedStatement psStatus = con.prepareStatement("INSERT INTO queststatus (`queststatusid`, `characterid`, `quest`, `status`, `time`, `expires`, `forfeited`, `completed`) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-                     PreparedStatement psProgress = con.prepareStatement("INSERT INTO questprogress VALUES (DEFAULT, ?, ?, ?, ?)");
-                     PreparedStatement psMedal = con.prepareStatement("INSERT INTO medalmaps VALUES (DEFAULT, ?, ?, ?)")) {
+                try (PreparedStatement psStatus = con.prepareStatement(
+                        "INSERT INTO queststatus (`queststatusid`, `characterid`, `quest`, `status`, `time`, `expires`, `forfeited`, `completed`) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);
+                        PreparedStatement psProgress = con
+                                .prepareStatement("INSERT INTO questprogress VALUES (DEFAULT, ?, ?, ?, ?)");
+                        PreparedStatement psMedal = con
+                                .prepareStatement("INSERT INTO medalmaps VALUES (DEFAULT, ?, ?, ?)")) {
                     psStatus.setInt(1, id);
 
                     for (QuestStatus qs : getQuestValues()) {
@@ -7706,17 +7896,17 @@ public class Character extends AbstractCharacterObject {
                     }
                 }
 
-                FamilyEntry familyEntry = getFamilyEntry(); //save family rep
+                FamilyEntry familyEntry = getFamilyEntry(); // save family rep
                 if (familyEntry != null) {
                     if (familyEntry.saveReputation(con)) {
                         familyEntry.savedSuccessfully();
                     }
                     FamilyEntry senior = familyEntry.getSenior();
-                    if (senior != null && senior.getChr() == null) { //only save for offline family members
+                    if (senior != null && senior.getChr() == null) { // only save for offline family members
                         if (senior.saveReputation(con)) {
                             senior.savedSuccessfully();
                         }
-                        senior = senior.getSenior(); //save one level up as well
+                        senior = senior.getSenior(); // save one level up as well
                         if (senior != null && senior.getChr() == null) {
                             if (senior.saveReputation(con)) {
                                 senior.savedSuccessfully();
@@ -7749,28 +7939,30 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void sendPolice(int greason, String reason, int duration) {
-        sendPacket(PacketCreator.sendPolice(String.format("You have been blocked by the#b %s Police for %s.#k", "Cosmic", reason)));
+        sendPacket(PacketCreator
+                .sendPolice(String.format("You have been blocked by the#b %s Police for %s.#k", "Cosmic", reason)));
         this.banned = true;
         TimerManager.getInstance().schedule(() -> client.disconnect(false, false), duration);
     }
 
     public void sendPolice(String text) {
         final String message = getName() + " received this - " + text;
-        if (Server.getInstance().isGmOnline(this.getWorld())) { //Alert and log if a GM is online
+        if (Server.getInstance().isGmOnline(this.getWorld())) { // Alert and log if a GM is online
             Server.getInstance().broadcastGMMessage(this.getWorld(), PacketCreator.sendYellowTip(message));
-        } else { //Auto DC and log if no GM is online
+        } else { // Auto DC and log if no GM is online
             client.disconnect(false, false);
         }
         log.info(message);
-        //Server.getInstance().broadcastGMMessage(0, PacketCreator.serverNotice(1, getName() + " received this - " + text));
-        //sendPacket(PacketCreator.sendPolice(text));
-        //this.isbanned = true;
-        //TimerManager.getInstance().schedule(new Runnable() {
-        //    @Override
-        //    public void run() {
-        //        client.disconnect(false, false);
-        //    }
-        //}, 6000);
+        // Server.getInstance().broadcastGMMessage(0, PacketCreator.serverNotice(1,
+        // getName() + " received this - " + text));
+        // sendPacket(PacketCreator.sendPolice(text));
+        // this.isbanned = true;
+        // TimerManager.getInstance().schedule(new Runnable() {
+        // @Override
+        // public void run() {
+        // client.disconnect(false, false);
+        // }
+        // }, 6000);
     }
 
     public void sendKeymap() {
@@ -7789,7 +7981,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void sendMacros() {
-        // Always send the macro packet to fix a client side bug when switching characters.
+        // Always send the macro packet to fix a client side bug when switching
+        // characters.
         sendPacket(PacketCreator.getMacros(skillMacros));
     }
 
@@ -7820,7 +8013,6 @@ public class Character extends AbstractCharacterObject {
     public void setDojoEnergy(int x) {
         this.dojoEnergy = Math.min(x, 10000);
     }
-
 
     public void setEventInstance(EventInstanceManager eventInstance) {
         evtLock.lock();
@@ -7907,7 +8099,7 @@ public class Character extends AbstractCharacterObject {
 
         final boolean chrDied = playerDied;
         Runnable r = () -> {
-            updatePartyMemberHP();    // thanks BHB (BHB88) for detecting a deadlock case within player stats.
+            updatePartyMemberHP(); // thanks BHB (BHB88) for detecting a deadlock case within player stats.
 
             if (chrDied) {
                 playerDead();
@@ -7997,7 +8189,8 @@ public class Character extends AbstractCharacterObject {
             effLock.unlock();
         }
 
-        if (GameConfig.getServerBoolean("use_server_auto_pot") || GameConfig.getServerBoolean("use_compulsory_auto_pot")) {
+        if (GameConfig.getServerBoolean("use_server_auto_pot")
+                || GameConfig.getServerBoolean("use_compulsory_auto_pot")) {
             float autoHpAlert, autoMpAlert;
             if (GameConfig.getServerBoolean("use_server_auto_pot")) {
                 autoHpAlert = hpMpAlertService.getHpAlertPer(id);
@@ -8158,7 +8351,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public int sellAllItemsFromName(byte invTypeId, String name) {
-        //player decides from which inventory items should be sold.
+        // player decides from which inventory items should be sold.
         InventoryType type = InventoryType.getByType(invTypeId);
 
         Inventory inv = getInventory(type);
@@ -8204,7 +8397,7 @@ public class Character extends AbstractCharacterObject {
         inv.lockInventory();
         try {
             Item item = inv.getItem(slot);
-            if (item == null) { //Basic check
+            if (item == null) { // Basic check
                 return (0);
             }
 
@@ -8259,7 +8452,8 @@ public class Character extends AbstractCharacterObject {
         return list;
     }
 
-    private static List<Equip> getEquipsWithStat(List<Pair<Equip, Map<StatUpgrade, Short>>> equipped, StatUpgrade stat) {
+    private static List<Equip> getEquipsWithStat(List<Pair<Equip, Map<StatUpgrade, Short>>> equipped,
+            StatUpgrade stat) {
         List<Equip> equippedWithStat = new LinkedList<>();
 
         for (Pair<Equip, Map<StatUpgrade, Short>> eq : equipped) {
@@ -8293,10 +8487,10 @@ public class Character extends AbstractCharacterObject {
             }
 
             /*
-            for (Entry<StatUpgrade, Float> es : statups.entrySet()) {
-                System.out.println(es);
-            }
-            */
+             * for (Entry<StatUpgrade, Float> es : statups.entrySet()) {
+             * System.out.println(es);
+             * }
+             */
 
             for (Entry<StatUpgrade, Float> e : statups.entrySet()) {
                 Double ev = Math.sqrt(e.getValue());
@@ -8363,7 +8557,8 @@ public class Character extends AbstractCharacterObject {
     private void standaloneMerge(Map<StatUpgrade, Float> statUps, Client c, InventoryType type, short slot, Item item) {
         short quantity;
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
-        if (item == null || (quantity = item.getQuantity()) < 1 || ii.isCash(item.getItemId()) || !ii.isUpgradeable(item.getItemId()) || hasMergeFlag(item)) {
+        if (item == null || (quantity = item.getQuantity()) < 1 || ii.isCash(item.getItemId())
+                || !ii.isUpgradeable(item.getItemId()) || hasMergeFlag(item)) {
             return;
         }
 
@@ -8393,7 +8588,6 @@ public class Character extends AbstractCharacterObject {
         slots = slotid;
     }
 
-
     public void shiftPetsRight() {
         petLock.lock();
         try {
@@ -8420,7 +8614,7 @@ public class Character extends AbstractCharacterObject {
     public void showUnderLeveledInfo(Monster mob) {
         long curTime = Server.getInstance().getCurrentTime();
         if (nextWarningTime < curTime) {
-            nextWarningTime = curTime + MINUTES.toMillis(1);   // show underlevel info again after 1 minute
+            nextWarningTime = curTime + MINUTES.toMillis(1); // show underlevel info again after 1 minute
 
             showHint(I18nUtil.getMessage("Character.showUnderLeveledInfo", mob.getName(), mob.getLevel()));
         }
@@ -8443,7 +8637,8 @@ public class Character extends AbstractCharacterObject {
             strLines.add("");
             strLines.add(this.getClient().getChannelServer().getServerMessage().isEmpty() ? 0 : 1, "Get off my lawn!!");
 
-            this.sendPacket(PacketCreator.getAvatarMega(mapOwner, medal, this.getClient().getChannel(), ItemId.ROARING_TIGER_MESSENGER, strLines, true));
+            this.sendPacket(PacketCreator.getAvatarMega(mapOwner, medal, this.getClient().getChannel(),
+                    ItemId.ROARING_TIGER_MESSENGER, strLines, true));
         }
     }
 
@@ -8595,7 +8790,8 @@ public class Character extends AbstractCharacterObject {
             QuestStatus iqs = getQuest(iq);
             iqs.setProgress(0, progress);
         } else {
-            qs.setProgress(infoNumber, progress);   // quest progress is thoroughly a string match, infoNumber is actually another questid
+            qs.setProgress(infoNumber, progress); // quest progress is thoroughly a string match, infoNumber is actually
+                                                  // another questid
         }
 
         announceUpdateQuest(DelayedQuestUpdate.UPDATE, qs, false);
@@ -8686,16 +8882,18 @@ public class Character extends AbstractCharacterObject {
             if (!mquest.isSameDayRepeatable() && !Quest.isExploitableQuest(questid)) {
                 awardQuestPoint(GameConfig.getServerInt("quest_point_per_quest_complete"));
             }
-            qs.setCompleted(qs.getCompleted() + 1);   // Jayd's idea - count quest completed
+            qs.setCompleted(qs.getCompleted() + 1); // Jayd's idea - count quest completed
 
             announceUpdateQuest(DelayedQuestUpdate.COMPLETE, questid, qs.getCompletionTime());
-            //announceUpdateQuest(DelayedQuestUpdate.INFO, qs); // happens after giving rewards, for non-next quests only
+            // announceUpdateQuest(DelayedQuestUpdate.INFO, qs); // happens after giving
+            // rewards, for non-next quests only
         } else if (qs.getStatus().equals(QuestStatus.Status.NOT_STARTED)) {
             announceUpdateQuest(DelayedQuestUpdate.UPDATE, qs, false);
             if (qs.getInfoNumber() > 0) {
                 announceUpdateQuest(DelayedQuestUpdate.UPDATE, qs, true);
             }
-            // reminder: do not reset quest progress of infoNumbers, some quests cannot backtrack
+            // reminder: do not reset quest progress of infoNumbers, some quests cannot
+            // backtrack
         }
     }
 
@@ -8729,7 +8927,8 @@ public class Character extends AbstractCharacterObject {
         try {
             if (!questExpirations.isEmpty()) {
                 if (questExpireTask == null) {
-                    questExpireTask = TimerManager.getInstance().register(this::runQuestExpireTask, SECONDS.toMillis(10));
+                    questExpireTask = TimerManager.getInstance().register(this::runQuestExpireTask,
+                            SECONDS.toMillis(10));
                 }
             }
         } finally {
@@ -8798,7 +8997,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     private void updateSingleStat(Stat stat, int newval, boolean itemReaction) {
-        sendPacket(PacketCreator.updatePlayerStats(Collections.singletonList(new Pair<>(stat, Integer.valueOf(newval))), itemReaction, this));
+        sendPacket(PacketCreator.updatePlayerStats(Collections.singletonList(new Pair<>(stat, Integer.valueOf(newval))),
+                itemReaction, this));
     }
 
     public void sendPacket(Packet packet) {
@@ -8920,14 +9120,15 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void autoBan(String reason) {
-        if (this.isGM() || this.isBanned()) {  // thanks RedHat for noticing GM's being able to get banned
+        if (this.isGM() || this.isBanned()) { // thanks RedHat for noticing GM's being able to get banned
             return;
         }
         this.ban(reason);
-        sendPacket(PacketCreator.sendPolice(I18nUtil.getMessage("Character.autoBan.message1")));  //发送自动封禁提示
+        sendPacket(PacketCreator.sendPolice(I18nUtil.getMessage("Character.autoBan.message1"))); // 发送自动封禁提示
         TimerManager.getInstance().schedule(() -> client.disconnect(false, false), 5000);
 
-        Server.getInstance().broadcastGMMessage(this.getWorld(), PacketCreator.serverNotice(6, Character.makeMapleReadable(this.name) + " was autobanned for " + reason));
+        Server.getInstance().broadcastGMMessage(this.getWorld(), PacketCreator.serverNotice(6,
+                Character.makeMapleReadable(this.name) + " was autobanned for " + reason));
     }
 
     public void block(int reason, int days, String desc) {
@@ -9042,17 +9243,20 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
-    private void equipPendantOfSpirit() {   //精灵吊坠装备时长经验计算
+    private void equipPendantOfSpirit() { // 精灵吊坠装备时长经验计算
         if (pendantOfSpirit == null) {
             pendantOfSpirit = TimerManager.getInstance().register(() -> {
                 if (pendantExp < 3) {
                     pendantExp++;
-                    //用于准确提示装备1小时内还是装备经过几小时
-                    message(I18nUtil.getMessage(pendantExp <= 2 ? "Character.equipPendantOfSpirit.message1" : "Character.equipPendantOfSpirit.message2", pendantExp == 3 ? 2 : pendantExp, pendantExp * 10));
+                    // 用于准确提示装备1小时内还是装备经过几小时
+                    message(I18nUtil.getMessage(
+                            pendantExp <= 2 ? "Character.equipPendantOfSpirit.message1"
+                                    : "Character.equipPendantOfSpirit.message2",
+                            pendantExp == 3 ? 2 : pendantExp, pendantExp * 10));
                 } else {
                     pendantOfSpirit.cancel(false);
                 }
-            }, 3600000); //1 hour
+            }, 3600000); // 1 hour
         }
     }
 
@@ -9082,7 +9286,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void increaseEquipExp(int expGain) {
-        if (allowExpGain) {     // thanks Vcoc for suggesting equip EXP gain conditionally
+        if (allowExpGain) { // thanks Vcoc for suggesting equip EXP gain conditionally
             if (expGain < 0) {
                 expGain = Integer.MAX_VALUE;
             }
@@ -9190,8 +9394,10 @@ public class Character extends AbstractCharacterObject {
         extraRecoveryTask = null;
 
         // already done on unregisterChairBuff
-        /* if (chairRecoveryTask != null) { chairRecoveryTask.cancel(true); }
-        chairRecoveryTask = null; */
+        /*
+         * if (chairRecoveryTask != null) { chairRecoveryTask.cancel(true); }
+         * chairRecoveryTask = null;
+         */
 
         if (pendantOfSpirit != null) {
             pendantOfSpirit.cancel(true);
@@ -9230,11 +9436,12 @@ public class Character extends AbstractCharacterObject {
             }
 
             getWorldServer().registerTimedMapObject(() -> {
-                client = null;  // clients still triggers handlers a few times after disconnecting
+                client = null; // clients still triggers handlers a few times after disconnecting
                 map = null;
                 setListener(null);
 
-                // thanks Shavit for noticing a memory leak with inventories holding owner object
+                // thanks Shavit for noticing a memory leak with inventories holding owner
+                // object
                 for (int i = 0; i < inventory.length; i++) {
                     inventory[i].dispose();
                 }
@@ -9250,7 +9457,6 @@ public class Character extends AbstractCharacterObject {
                 .lastLogoutTime(new Timestamp(System.currentTimeMillis()))
                 .build());
     }
-
 
     public long getLoggedInTime() {
         return System.currentTimeMillis() - loginTime;
@@ -9270,7 +9476,8 @@ public class Character extends AbstractCharacterObject {
 
     public void removePartyQuestItem(String letter) {
         if (gotPartyQuestItem(letter)) {
-            dataString = dataString.substring(0, dataString.indexOf(letter)) + dataString.substring(dataString.indexOf(letter) + letter.length());
+            dataString = dataString.substring(0, dataString.indexOf(letter))
+                    + dataString.substring(dataString.indexOf(letter) + letter.length());
         }
     }
 
@@ -9328,7 +9535,7 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
-    public void doPendingNameChange() { //called on logout
+    public void doPendingNameChange() { // called on logout
         if (!pendingNameChange) {
             return;
         }
@@ -9338,7 +9545,8 @@ public class Character extends AbstractCharacterObject {
     public int checkWorldTransferEligibility() {
         if (getLevel() < 20) {
             return 2;
-        } else if (getClient().getTempBanCalendar() != null && getClient().getTempBanCalendar().getTimeInMillis() + (int) DAYS.toMillis(30) < Calendar.getInstance().getTimeInMillis()) {
+        } else if (getClient().getTempBanCalendar() != null && getClient().getTempBanCalendar().getTimeInMillis()
+                + (int) DAYS.toMillis(30) < Calendar.getInstance().getTimeInMillis()) {
             return 3;
         } else if (isMarried()) {
             return 4;
@@ -9392,7 +9600,7 @@ public class Character extends AbstractCharacterObject {
 
     public void setReborns(int value) {
         if (!GameConfig.getServerBoolean("use_rebirth_system")) {
-            yellowMessage(I18nUtil.getMessage("Character.USE_REBIRTH_SYSTEM")); //重生系统未启用
+            yellowMessage(I18nUtil.getMessage("Character.USE_REBIRTH_SYSTEM")); // 重生系统未启用
             throw new NotEnabledException();
         }
 
@@ -9408,7 +9616,7 @@ public class Character extends AbstractCharacterObject {
 
     public int getReborns() {
         if (!GameConfig.getServerBoolean("use_rebirth_system")) {
-            yellowMessage(I18nUtil.getMessage("Character.USE_REBIRTH_SYSTEM")); //重生系统未启用
+            yellowMessage(I18nUtil.getMessage("Character.USE_REBIRTH_SYSTEM")); // 重生系统未启用
             throw new NotEnabledException();
         }
 
@@ -9422,7 +9630,7 @@ public class Character extends AbstractCharacterObject {
 
     public void executeRebornAs(Job job) {
         if (!GameConfig.getServerBoolean("use_rebirth_system")) {
-            yellowMessage(I18nUtil.getMessage("Character.USE_REBIRTH_SYSTEM")); //重生系统未启用
+            yellowMessage(I18nUtil.getMessage("Character.USE_REBIRTH_SYSTEM")); // 重生系统未启用
             throw new NotEnabledException();
         }
         if (getLevel() != getMaxClassLevel()) {
@@ -9434,7 +9642,7 @@ public class Character extends AbstractCharacterObject {
         levelUp(true);
     }
 
-    //EVENTS
+    // EVENTS
     @Getter
     private byte team = 0;
     @Setter
@@ -9503,7 +9711,8 @@ public class Character extends AbstractCharacterObject {
             }
             sendPacket(PacketCreator.CPUpdate(false, this.getCP(), this.getTotalCP(), getTeam()));
             if (this.getParty() != null && getTeam() != -1) {
-                this.getMap().broadcastMessage(PacketCreator.CPUpdate(true, this.getMonsterCarnival().getCP(team), this.getMonsterCarnival().getTotalCP(team), getTeam()));
+                this.getMap().broadcastMessage(PacketCreator.CPUpdate(true, this.getMonsterCarnival().getCP(team),
+                        this.getMonsterCarnival().getTotalCP(team), getTeam()));
             }
         }
     }
@@ -9553,8 +9762,8 @@ public class Character extends AbstractCharacterObject {
      * @param expireTime  失效时间，-1为不失效 来自 @leevccc 的建议，传值则为分钟
      */
     public void gainEquip(int itemId, Short attStr, Short attDex, Short attInt, Short attLuk, Short attHp, Short attMp,
-                          Short pAtk, Short mAtk, Short pDef, Short mDef, Short acc, Short avoid, Short hands, Short speed,
-                          Short jump, Byte upgradeSlot, Long expireTime) {
+            Short pAtk, Short mAtk, Short pDef, Short mDef, Short acc, Short avoid, Short hands, Short speed,
+            Short jump, Byte upgradeSlot, Long expireTime) {
         if (!ItemConstants.getInventoryType(itemId).equals(InventoryType.EQUIP)) {
             message(I18nUtil.getMessage("AbstractPlayerInteraction.gainEquip.message1"));
             return;
@@ -9617,8 +9826,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     /////////////////////////////////////////////////////////////////////////////////
-    //module: 角色在线时间
-    private int m_iCurrentOnlineTime = -1;//-1用于服务器重启时角色初始变量时间
+    // module: 角色在线时间
+    private int m_iCurrentOnlineTime = -1;// -1用于服务器重启时角色初始变量时间
 
     public int getCurrentOnlineTime() {
         return this.m_iCurrentOnlineTime;
@@ -9635,8 +9844,9 @@ public class Character extends AbstractCharacterObject {
 
     /**
      * 获取地图类
-     * @param mapid 地图ID
-     * @param showMsg   true = 地图不存在弹出提示，false = 不提示
+     * 
+     * @param mapid   地图ID
+     * @param showMsg true = 地图不存在弹出提示，false = 不提示
      * @return
      */
     public MapleMap getMap(int mapid, boolean showMsg) {
@@ -9650,8 +9860,8 @@ public class Character extends AbstractCharacterObject {
             log.warn(I18nUtil.getLogMessage("Character.Map.Change.warn1"), getName(), getMap().getMapName(), getMapId(),
                     I18nUtil.getLogMessage("SystemRescue.info.map.message1"),
                     mapid);
-            dropMessage(5, msg);                 //聊天窗红色消息提示
-            dropMessage(1, msg);                 //弹窗消息
+            dropMessage(5, msg); // 聊天窗红色消息提示
+            dropMessage(1, msg); // 弹窗消息
             enableActions();
         }
         return map;
@@ -9663,4 +9873,11 @@ public class Character extends AbstractCharacterObject {
     public void enableActions() {
         sendPacket(PacketCreator.enableActions());
     }
+
+    public void enableActions(int petIndex) {
+        if (petIndex >= 0 && petLootInProgress.get()) {
+            return;
+        }
+        sendPacket(PacketCreator.enableActions());
+    };
 }
