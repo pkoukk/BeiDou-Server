@@ -33,7 +33,6 @@ import org.gms.util.PacketCreator;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -53,10 +52,10 @@ public final class PetLootHandler extends AbstractPacketHandler {
         }
 
         if (pet.getLevel() > 10) {
-            double fullnessPunishment = (1 - (pet.getFullness() / 100.0)) * 0.6;
-            double range = ((pet.getLevel() - 5) * 40) * fullnessPunishment + 50;
+            double fullnessPunishment = (1 - (pet.getFullness() / 100.0)) * 0.3;
+            double range = ((pet.getLevel() - 5) * 40) * (1 - fullnessPunishment) + 50;
             List<MapObject> items = chr.getMap().getMapObjectsInRange(pet.getPos(),
-                    range, Arrays.asList(MapObjectType.ITEM));
+                    range * range, Arrays.asList(MapObjectType.ITEM));
 
             // filter items that can be picked up
             List<MapObject> filteredItems = items.stream()
@@ -66,6 +65,7 @@ public final class PetLootHandler extends AbstractPacketHandler {
                                 || mapItem.getOwnerId() == chr.getPartyId());
                     })
                     .toList();
+
             chr.pickupItems(filteredItems, petIndex);
         } else {
             p.skip(13);

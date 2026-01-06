@@ -1999,6 +1999,10 @@ public class Character extends AbstractCharacterObject {
         }
         try {
             for (MapObject ob : obs) {
+                var item = (MapItem) ob;
+                if (!this.needQuestItem(item.getQuest(), item.getItemId())) {
+                    continue;
+                }
                 pickupItem(ob, petIndex);
             }
         } catch (Exception e) {
@@ -2030,6 +2034,7 @@ public class Character extends AbstractCharacterObject {
             mapitem.lockItem();
             try {
                 if (mapitem.isPickedUp()) {
+
                     sendPacket(PacketCreator.showItemUnavailable());
                     enableActions(petIndex);
                     return;
