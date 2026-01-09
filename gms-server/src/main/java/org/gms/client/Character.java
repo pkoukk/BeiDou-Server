@@ -9923,11 +9923,14 @@ public class Character extends AbstractCharacterObject {
     }
 
     private static List<AutoBuffDef> AUTO_BUFFS = List.of(
-            new AutoBuffDef(2001002, 10, 1000), // 魔力提升
-            new AutoBuffDef(1001003, 20, 1500), // 力量提升
-            new AutoBuffDef(1201003, 30, 2000), // 智力提升
-            new AutoBuffDef(1101003, 40, 2500), // 敏捷提升
-            new AutoBuffDef(1301003, 50, 3000) // 运气提升
+            new AutoBuffDef(4101004, 20, 1000), // 轻功
+            new AutoBuffDef(2301004, 30, 1000), // 祝福
+            new AutoBuffDef(2311003, 35, 1500), // 神圣祈祷（花）
+            new AutoBuffDef(1301007, 40, 2000), // 神圣之火
+            new AutoBuffDef(4111001, 50, 2500), // 聚财术
+            new AutoBuffDef(1111007, 50, 3000), // 防御崩坏
+             new AutoBuffDef(3121002, 100, 3000), // 火眼晶晶
+              new AutoBuffDef(5121009, 100, 3000) // 极速领域
     );
 
     public void autoBuffTick() {
