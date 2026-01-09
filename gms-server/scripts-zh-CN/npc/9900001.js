@@ -53,7 +53,7 @@ function action(mode, type, selection) {
         text += "#L0#新人福利#l \t #L1#每日签到#l\t #L2#在线奖励#l\r\n";
 
         if (cm.getPlayer().getLevel()>=15) {
-        text += "#L15#随身仓库#l\t #L4#皇家发型#l\t #L5#时尚点装#l\r\n";
+        text += "#L15#随身仓库#l\t #L4#皇家发型#l\t #L5#BUFF包钟#l\r\n";
         }
 
         if (cm.getPlayer().getLevel()>=20) {
@@ -121,7 +121,7 @@ function doSelect(selection) {
             openNpc("皇家发型");
             break;
         case 5:
-            openNpc("时尚点装");
+            openNpc("BUFF包钟");
             break;
         case 6:
             cm.openShopNPC(9201099); //便利商店
