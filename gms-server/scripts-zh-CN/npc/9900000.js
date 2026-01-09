@@ -38,7 +38,7 @@ var face = [20000, 20001, 20002, 20003, 20004, 20005, 20006, 20007, 20008, 20009
 var fface = [21000, 21001, 21002, 21003, 21004, 21005, 21006, 21007, 21008, 21009, 21010, 21011, 21012, 21013, 21014, 21016, 21017, 21018, 21019, 21020, 21021, 21022, 21023, 21024, 21025, 21026, 21027, 21029, 21030];
 var facenew = Array();
 var colors = Array();
-var price = 100000;
+var price = 1000000;
 
 function pushIfItemExists(array, itemid) {
     if ((itemid = cm.getCosmeticItem(itemid)) != -1 && !cm.isCosmeticEquipped(itemid)) {  // thanks Conrad for noticing NPC crashing the player when trying to display inexistent cosmetics
@@ -54,7 +54,7 @@ function start() {
     }
 
     if (cm.getPlayer().isMale()) {
-        cm.sendSimple("嘿，你可以用" + price + "金币改变你的外观。你想要改变什么？\r\n#L0#肤色#l\r\n#L1#男性发型#l\r\n#L2#发色#l\r\n#L3#男性普通眼睛#l\r\n#L4#眼睛颜色#l");
+        cm.sendSimple("嘿，你可以用" + price + "金币改变你的外观。你想要改变什么？\r\n#L0#肤色#l\r\n#L1#男性发型#l\r\n#L2#发色#l\r\n#L3#男性眼睛#l\r\n#L4#眼睛颜色#l");
     } else {
         cm.sendSimple("嘿，你可以用" + price + "金币改变你的外观。你想要改变什么？\r\n#L0#肤色#l\r\n#L5#女性发型#l\r\n#L2#发色#l\r\n#L6#女性眼睛#l\r\n#L4#眼睛颜色#l");
     }
@@ -70,28 +70,28 @@ function action(mode, type, selection) {
         beauty = selection + 1;
         if (cm.getMeso() > price) {
             if (selection == 0) {
-                cm.sendStyle("Pick one?", skin);
+                cm.sendStyle("选一个?", skin);
             } else if (selection == 1 || selection == 5) {
                 (selection == 1 ? hair : fhair).forEach(i => pushIfItemExists(hairnew, i));
-                cm.sendStyle("Pick one?", hairnew);
+                cm.sendStyle("选一个?", hairnew);
             } else if (selection == 2) {
                 var baseHair = parseInt(cm.getPlayer().getHair() / 10) * 10;
                 for (var k = 0; k < 8; k++) {
                     pushIfItemExists(haircolor, baseHair + k);
                 }
-                cm.sendStyle("Pick one?", haircolor);
+                cm.sendStyle("选一个?", haircolor);
             } else if (selection == 3 || selection == 6) {
                 (selection == 3 ? face : fface).forEach(j => pushIfItemExists(facenew, j));
-                cm.sendStyle("Pick one?", facenew);
+                cm.sendStyle("选一个?", facenew);
             } else if (selection == 4) {
                 var baseFace = parseInt(cm.getPlayer().getFace() / 1000) * 1000 + parseInt(cm.getPlayer().getFace() % 100);
                 for (var i = 0; i < 9; i++) {
                     pushIfItemExists(colors, baseFace + (i * 100));
                 }
-                cm.sendStyle("Pick one?", colors);
+                cm.sendStyle("选一个?", colors);
             }
         } else {
-            cm.sendNext("你的冒险币不够。很抱歉，没有" + price + "个冒险币，你将无法改变你的外观！");
+            cm.sendNext("你的金币不够。很抱歉，没有" + price + "个冒险币，你将无法改变你的外观！");
             cm.dispose();
         }
 
