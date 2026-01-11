@@ -73,9 +73,9 @@ function action(mode, type, selection) {
                     cm.sendOk("Hi. Welcome to the #bstage " + stage + "#k. You need ranged personnel here. They must kill the three Ratz, which will trigger something. What's next is for you to find out! Get me 3 passes!");
                     eim.setProperty("statusStg" + stage, 0);
                 } else if (state == 0) {       // check stage completion
-                    if (cm.haveItem(4001022, 3)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("Good job! You have collected all 3 #b#t4001022#'s.#k");
-                        cm.gainItem(4001022, -3);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);

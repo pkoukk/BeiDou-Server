@@ -72,9 +72,9 @@ function action(mode, type, selection) {
                     cm.sendOk("嗨，欢迎来到第#b" + stage + "#k关。收集地图上散落的 15 个 #t4001022#，然后和我交谈。");
                     eim.setProperty("statusStg" + stage, 0);
                 } else {       // check stage completion
-                    if (cm.haveItem(4001022, 15)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("干得好！你已经收集了所有15个#b#t4001022#。#k");
-                        cm.gainItem(4001022, -15);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);
