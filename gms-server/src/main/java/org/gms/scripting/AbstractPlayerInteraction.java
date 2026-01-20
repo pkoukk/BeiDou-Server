@@ -86,6 +86,14 @@ public class AbstractPlayerInteraction {
         return c.getPlayer();
     }
 
+    public void playerAutoBuff(boolean enabled) {
+        if (enabled) {
+            getPlayer().startAutoBuff();
+        } else {
+            getPlayer().stopAutoBuff();
+        }
+    }
+
     public int getJobId() {
         return getPlayer().getJob().getId();
     }

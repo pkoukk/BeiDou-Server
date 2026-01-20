@@ -72,9 +72,9 @@ function action(mode, type, selection) {
                     cm.sendOk("Hi. Welcome to the #bstage " + stage + "#k. This is the 2nd stage, but everyone has to cooperate. There are 6 portals here. One is guarded by undefeatable monsters, and one is very high. I'd like you and your party to go in each one and break the boxes inside. Bring back the drops -- there should be 24.");
                     eim.setProperty("statusStg" + stage, 0);
                 } else {       // check stage completion
-                    if (cm.haveItem(4001022, 24)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("Good job! You have collected all 24 #b#t4001022#'s.#k");
-                        cm.gainItem(4001022, -24);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);

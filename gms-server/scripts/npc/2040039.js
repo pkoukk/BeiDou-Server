@@ -72,9 +72,9 @@ function action(mode, type, selection) {
                     cm.sendOk("Hi. Welcome to the #bstage " + stage + "#k. On this stage, several creatures are hiding in the shadows of the inner parts of this tower. Some of them cannot be beaten by physical means, so magical attacks are required to do the job, whereas others work the other way around. Get me 6 #t4001022#'s this time.");
                     eim.setProperty("statusStg" + stage, 0);
                 } else {                      // check stage completion
-                    if (cm.haveItem(4001022, 6)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("Good job! You have collected all 6 #b#t4001022#'s.#k");
-                        cm.gainItem(4001022, -6);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);

@@ -72,9 +72,9 @@ function action(mode, type, selection) {
                     cm.sendOk("Hi. Welcome to the #bstage " + stage + "#k. Collect 32 #t4001022#'s scattered across the map, then talk to me.");
                     eim.setProperty("statusStg" + stage, 0);
                 } else {       // check stage completion
-                    if (cm.haveItem(4001022, 32)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("Good job! You have collected all 32 #b#t4001022#'s.#k");
-                        cm.gainItem(4001022, -32);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);

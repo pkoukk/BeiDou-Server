@@ -72,9 +72,9 @@ function action(mode, type, selection) {
                     cm.sendOk("嗨，欢迎来到第#b" + stage + "#k关。在这个阶段，有几种生物隐藏在这座塔的内部阴影中。其中一些无法通过物理手段击败，因此需要使用魔法攻击来完成任务，而其他一些则相反。这次给我带来6个#t4001022#。");
                     eim.setProperty("statusStg" + stage, 0);
                 } else {                      // check stage completion
-                    if (cm.haveItem(4001022, 6)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("干得好！你已经收集了所有6个#b#t4001022#。#k");
-                        cm.gainItem(4001022, -6);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);

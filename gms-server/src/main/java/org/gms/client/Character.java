@@ -479,6 +479,8 @@ public class Character extends AbstractCharacterObject {
 
     private AtomicBoolean petLootInProgress = new AtomicBoolean(false);
 
+    private boolean autoBuffEnabled = false;
+
     // 获取 FamilyExp 的值
     @Getter
     private float familyExp = 1;
@@ -9885,4 +9887,123 @@ public class Character extends AbstractCharacterObject {
         }
         sendPacket(PacketCreator.enableActions());
     };
+
+    public boolean getAutoBuffEnabled() {
+        return this.autoBuffEnabled;
+    }
+
+    public void setAutoBuffEnabled(boolean enable) {
+        this.autoBuffEnabled = enable;
+    }
+
+    private final Map<Integer, AutoBuffInstance> autoBuffs = new ConcurrentHashMap<>();
+
+    public void addAutoBuff(int skillId) {
+        if (autoBuffs.containsKey(skillId)) {
+            return;
+        }
+
+        Skill skill = SkillFactory.getSkill(skillId);
+        int level = skill.getMaxLevel();
+
+        AutoBuffInstance inst = new AutoBuffInstance(this, skillId, level);
+        autoBuffs.put(skillId, inst);
+        inst.start();
+    }
+
+    public void removeAutoBuff(int skillId) {
+        AutoBuffInstance inst = autoBuffs.remove(skillId);
+        if (inst != null) {
+            inst.stop();
+        }
+    }
+
+    public boolean hasAutoBuff(int skillId) {
+        return autoBuffs.containsKey(skillId);
+    }
+
+    private static List<AutoBuffDef> AUTO_BUFFS = List.of(
+            new AutoBuffDef(4101004, 20, 1000), // 轻功
+            new AutoBuffDef(2301004, 30, 1000), // 祝福
+            new AutoBuffDef(2311003, 35, 1500), // 神圣祈祷（花）
+            new AutoBuffDef(1301007, 40, 2000), // 神圣之火
+            new AutoBuffDef(4111001, 50, 2500), // 聚财术
+            new AutoBuffDef(1111007, 50, 3000), // 防御崩坏
+             new AutoBuffDef(3121002, 100, 3000), // 火眼晶晶
+              new AutoBuffDef(5121009, 100, 3000) // 极速领域
+    );
+
+    public void autoBuffTick() {
+        if (!autoBuffEnabled) {
+            return;
+        }
+        int level = getLevel();
+        // 根据等级算“应该有的 Buff”
+        Set<AutoBuffDef> eligible = AUTO_BUFFS.stream()
+                .filter(b -> level >= b.minLevel)
+                .collect(Collectors.toSet());
+
+        // 计算费用
+        int totalCost = eligible.stream()
+                .mapToInt(b -> b.costPerTick)
+                .sum();
+
+        // 4️⃣ 检查金币
+        if (getMeso() < totalCost) {
+            dropMessage(5, "金币不足，自动 Buff 已关闭。");
+            setAutoBuffEnabled(false);
+            return;
+        }
+
+        // 5️⃣ 扣费
+        gainMeso(-totalCost);
+        // 新增
+        for (var sk : eligible) {
+            addAutoBuff(sk.skillId);
+        }
+
+        // 移除（等级下降 / 配置变更）
+        Set<Integer> shouldHave = eligible.stream()
+                .map(b -> b.skillId)
+                .collect(Collectors.toSet());
+        autoBuffs.keySet().removeIf(skillId -> {
+            boolean keep = shouldHave.contains(skillId);
+            if (!keep) {
+                removeAutoBuff(skillId);
+            }
+            return !keep;
+        });
+    }
+
+    private ScheduledFuture<?> autoBuffTask;
+
+    public void startAutoBuff() {
+        if (autoBuffTask != null && !autoBuffTask.isCancelled()) {
+            autoBuffTask.cancel(false);
+        }
+        autoBuffTask = TimerManager.getInstance().register(() -> {
+            try {
+                autoBuffTick();
+            } catch (Exception e) {
+                log.error(I18nUtil.getLogMessage("Character.autoBuffTick.error1"), getName(), e);
+            }
+        }, 600000, 600000); // 每 10 分钟
+        autoBuffEnabled = true;
+    }
+
+    public void stopAutoBuff() {
+        if (autoBuffTask != null && !autoBuffTask.isCancelled()) {
+            autoBuffTask.cancel(false);
+        }
+        autoBuffTask = null;
+        autoBuffEnabled = false;
+
+        // 移除所有 Buff 实例
+        for (var inst : autoBuffs.values()) {
+            inst.stop();
+        }
+        autoBuffs.clear();
+        autoBuffEnabled = false;
+    }
+
 }

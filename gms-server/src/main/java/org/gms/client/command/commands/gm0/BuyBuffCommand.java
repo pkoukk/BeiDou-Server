@@ -50,11 +50,11 @@ public class BuyBuffCommand extends Command {
             buffList.add(2311003); // 神圣祈祷（花）
             mesoCost+=5000;
         } 
-        if (player.getLevel()>=40) {
+        if (player.getLevel()>=30) {
             buffList.add(1301007); // 神圣之火
             mesoCost+=5000;
         }
-        if (player.getLevel()>=70) {
+        if (player.getLevel()>=50) {
             buffList.add(4111001); // 聚财术
             mesoCost+=10000;
             if (player.getJob().isA(Job.MAGICIAN)){
@@ -62,11 +62,11 @@ public class BuyBuffCommand extends Command {
                 mesoCost+=10000;
             }
         } 
-        if (player.getLevel()>=120) {
+        if (player.getLevel()>=100) {
             buffList.add(3121002); // 火眼晶晶
             mesoCost+=50000;
         }         
-        if (player.getLevel()>=120) {
+        if (player.getLevel()>=100) {
             buffList.add(5121009); // 极速领域
             mesoCost+=50000;
         } 

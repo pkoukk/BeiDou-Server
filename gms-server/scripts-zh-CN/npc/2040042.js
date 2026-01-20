@@ -73,13 +73,17 @@ function action(mode, type, selection) {
                     cm.sendOk("嗨，欢迎来到第#b" + stage + "#k关。你需要远程人员在这里。他们必须杀死三只老鼠，这将触发一些东西。接下来就是你自己去发现了！给我3张通行证！");
                     eim.setProperty("statusStg" + stage, 0);
                 } else if (state == 0) {       // check stage completion
-                    if (cm.haveItem(4001022, 3)) {
+                    if (cm.haveItem(4001022, 1)) {
                         cm.sendOk("干得好！你已经收集了所有3个#b#t4001022#。#k");
-                        cm.gainItem(4001022, -3);
+                        cm.gainItem(4001022, -1);
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);
-                    } else {
+                    }else if(eim.getPlayers().size()==1) {
+                        cm.sendOk("看起来你是最后一个人了。为了让你顺利通过，我会帮你收集所有3个#b#t4001022#。#k");
+                        cm.gainItem(4001022, 1);
+                    }
+                     else {
                         cm.sendNext("抱歉，你没有全部3个 #b#t4001022#。#k");
                     }
                 }
