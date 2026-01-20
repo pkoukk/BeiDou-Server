@@ -79,7 +79,11 @@ function action(mode, type, selection) {
 
                         eim.setProperty("statusStg" + stage, 1);
                         clearStage(stage, eim, curMap);
-                    } else {
+                    }else if(eim.getPlayers().size()==1) {
+                        cm.sendOk("看起来你是最后一个人了。为了让你顺利通过，我会帮你收集所有3个#b#t4001022#。#k");
+                        cm.gainItem(4001022, 1);
+                    }
+                     else {
                         cm.sendNext("抱歉，你没有全部3个 #b#t4001022#。#k");
                     }
                 }
