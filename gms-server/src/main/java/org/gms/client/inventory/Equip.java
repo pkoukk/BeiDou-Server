@@ -46,6 +46,7 @@ public class Equip extends Item {
     public enum ScrollResult {
 
         FAIL(0), SUCCESS(1), CURSE(2);
+
         private int value = -1;
 
         ScrollResult(int value) {
@@ -63,6 +64,7 @@ public class Equip extends Item {
         incMHP(4), incMMP(5), incPAD(6), incMAD(7),
         incPDD(8), incMDD(9), incEVA(10), incACC(11),
         incSpeed(12), incJump(13), incVicious(14), incSlot(15);
+
         private int value = -1;
 
         StatUpgrade(int value) {
@@ -78,7 +80,8 @@ public class Equip extends Item {
     private float itemExp;
     private int ringid = -1;
     private boolean wear = false;
-    private boolean isUpgradeable, isElemental = false;    // timeless or reverse, or any equip that could levelup on GMS for all effects
+    private boolean isUpgradeable, isElemental = false; // timeless or reverse, or any equip that could levelup on GMS
+                                                        // for all effects
     private static ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
     public Equip(int id, short position) {
@@ -286,7 +289,8 @@ public class Equip extends Item {
     }
 
     private static int getStatModifier(boolean isAttribute) {
-        // each set of stat points grants a chance for a bonus stat point upgrade at equip level up.
+        // each set of stat points grants a chance for a bonus stat point upgrade at
+        // equip level up.
 
         if (GameConfig.getServerBoolean("use_equipment_level_up_power")) {
             if (isAttribute) {
@@ -312,7 +316,25 @@ public class Equip extends Item {
         int stat = 0;
         if (rnd >= limit) {
             rnd -= limit;
-            stat = 1 + (int) Math.floor((-1 + Math.sqrt((8 * rnd) + 1)) / 2);    // optimized randomizeStatUpgrade author: David A.
+            stat = 1 + (int) Math.floor((-1 + Math.sqrt((8 * rnd) + 1)) / 2); // optimized randomizeStatUpgrade author:
+                                                                              // David A.
+        }
+
+        return stat;
+    }
+
+    private static int randomizeStatUpgrade(int top, double minPool) {
+        int limit = Math.min(top, GameConfig.getServerInt("max_equipment_level_up_stat_up"));
+
+        int poolCount = (limit * (limit + 1) / 2) + limit;
+        int poolStart = (int) (minPool * limit);
+        int rnd = Randomizer.rand(poolStart, poolCount);
+
+        int stat = 0;
+        if (rnd >= limit) {
+            rnd -= limit;
+            stat = 1 + (int) Math.floor((-1 + Math.sqrt((8 * rnd) + 1)) / 2); // optimized randomizeStatUpgrade author:
+                                                                              // David A.
         }
 
         return stat;
@@ -324,7 +346,8 @@ public class Equip extends Item {
     }
 
     private boolean isNotWeaponAffinity(StatUpgrade name) {
-        // Vcoc's idea - WATK/MATK expected gains lessens outside of weapon affinity (physical/magic)
+        // Vcoc's idea - WATK/MATK expected gains lessens outside of weapon affinity
+        // (physical/magic)
 
         if (ItemConstants.isWeapon(this.getItemId())) {
             if (name.equals(StatUpgrade.incPAD)) {
@@ -337,10 +360,21 @@ public class Equip extends Item {
         return false;
     }
 
-    private void getUnitStatUpgrade(List<Pair<StatUpgrade, Integer>> stats, StatUpgrade name, int curStat, boolean isAttribute) {
+    private void getUnitStatUpgrade(List<Pair<StatUpgrade, Integer>> stats, StatUpgrade name, int curStat,
+            boolean isAttribute) {
         isUpgradeable = true;
 
-        int maxUpgrade = randomizeStatUpgrade((int) (1 + (curStat / (getStatModifier(isAttribute) * (isNotWeaponAffinity(name) ? 2.7 : 1)))));
+        double minPool = 0.0;
+        var equipLevel = this.getOwner();
+        if (equipLevel == "[SSR]") {
+            minPool = 1.0;
+        } else if (equipLevel == "[SR]") {
+            minPool = 0.5;
+        }
+
+        int maxUpgrade = randomizeStatUpgrade(
+                (int) (1 + (curStat / (getStatModifier(isAttribute) * (isNotWeaponAffinity(name) ? 2.7 : 1)))),
+                minPool);
         if (maxUpgrade == 0) {
             return;
         }
@@ -350,56 +384,62 @@ public class Equip extends Item {
 
     /**
      * 尝试为单位插槽添加升级属性（默认10%成功率）
+     * 
      * @private
      * @static
      * @param {List<Pair<StatUpgrade, Integer>>} stats - 存储升级属性的列表（需传入引用）
-     * @param {StatUpgrade} name - 要尝试升级的属性类型
+     * @param {StatUpgrade}           name - 要尝试升级的属性类型
      * @description 调用重载方法时默认使用10%的成功概率
      */
     private static void getUnitSlotUpgrade(List<Pair<StatUpgrade, Integer>> stats, StatUpgrade name) {
-        getUnitSlotUpgrade(stats, name, 0.1);  // 默认10%成功率的快捷调用
+        getUnitSlotUpgrade(stats, name, 0.1); // 默认10%成功率的快捷调用
     }
+
     /**
      * 尝试为单位插槽添加升级属性（可配置概率）
+     * 
      * @private
      * @static
      * @param {List<Pair<StatUpgrade, Integer>>} stats - 存储升级属性的列表（需传入引用）
-     * @param {StatUpgrade} name - 要尝试升级的属性类型
-     * @param {double} chance - 成功概率值（范围0.0\~1.0）
+     * @param {StatUpgrade}           name - 要尝试升级的属性类型
+     * @param {double}                chance - 成功概率值（范围0.0\~1.0）
      * @description 通过随机数判断是否成功添加属性升级项
      */
     private static void getUnitSlotUpgrade(List<Pair<StatUpgrade, Integer>> stats, StatUpgrade name, double chance) {
-        if (Math.random() <= chance) {  // 概率判定核心逻辑
-            stats.add(new Pair<>(name, 1));  // 成功时添加新属性项
+        if (Math.random() <= chance) { // 概率判定核心逻辑
+            stats.add(new Pair<>(name, 1)); // 成功时添加新属性项
         }
     }
+
     /**
      * 判断是否需要增加砸卷次数或者减少金锤子已使用次数
      */
-    private void UpgradeSlotProcessing(List<Pair<StatUpgrade, Integer>> stats,int equipLevel) {
+    private void UpgradeSlotProcessing(List<Pair<StatUpgrade, Integer>> stats, int equipLevel) {
         if (GameConfig.getServerBoolean("use_equipment_level_up_slots")) {// 处理可砸卷次数逻辑
             getUnitSlotUpgrade(stats, StatUpgrade.incSlot); // 增加升级槽
         }
         if (GameConfig.getServerBoolean("use_equipment_level_up_vicious") && vicious > 0) { // 金锤子已使用次数大于0时
-            double[][] chanceList = {{0, 255, 0.1}};
+            double[][] chanceList = { { 0, 255, 0.1 } };
             String chanceParam = GameConfig.getServerString("use_equipment_level_up_vicious_levelrange_chance");
-            if(chanceParam != null) {
+            if (chanceParam != null) {
                 try {
                     chanceList = JSONObject.parseObject(chanceParam, double[][].class);
                 } catch (Throwable e) {
                     log.warn("金锤子装备等级范围概率参数解析失败，请检查是否正确");
                 }
             }
-            for(double[] obj : chanceList) {
-                double minLevel = obj[0],maxLevel = obj[1], chance = obj[2];
-                if(equipLevel >= minLevel && equipLevel <= maxLevel) {
-                    getUnitSlotUpgrade(stats, StatUpgrade.incVicious,chance); // 减少金锤子
+            for (double[] obj : chanceList) {
+                double minLevel = obj[0], maxLevel = obj[1], chance = obj[2];
+                if (equipLevel >= minLevel && equipLevel <= maxLevel) {
+                    getUnitSlotUpgrade(stats, StatUpgrade.incVicious, chance); // 减少金锤子
                     break;
                 }
             }
         }
     }
+
     private void improveDefaultStats(List<Pair<StatUpgrade, Integer>> stats) {
+
         if (dex > 0) {
             getUnitStatUpgrade(stats, StatUpgrade.incDEX, dex, true);
         }
@@ -496,6 +536,7 @@ public class Equip extends Item {
     /**
      * 装备升级时计算增加的属性值，值>0才显示，避免显示负数或者0，避免玩家以为属性被扣除了
      * 优化提示消息，使其更易懂
+     * 
      * @param stats 属性升级列表，包含属性类型和增加值
      * @return 返回一个 Pair，包含提示消息和两个布尔值（是否增加升级槽、是否减少金锤子）
      */
@@ -531,8 +572,9 @@ public class Equip extends Item {
 
     /**
      * 处理普通属性的升级逻辑
-     * @param type 属性类型
-     * @param value 属性增加值
+     * 
+     * @param type    属性类型
+     * @param value   属性增加值
      * @param maxStat 属性最大值
      * @return 实际增加的属性值
      */
@@ -547,57 +589,104 @@ public class Equip extends Item {
 
     /**
      * 获取当前属性值
+     * 
      * @param type 属性类型
      * @return 当前属性值
      */
     private int getCurrentStat(StatUpgrade type) {
         switch (type) {
-            case incDEX: return dex;
-            case incSTR: return str;
-            case incINT: return _int;
-            case incLUK: return luk;
-            case incMHP: return hp;
-            case incMMP: return mp;
-            case incPAD: return watk;
-            case incMAD: return matk;
-            case incPDD: return wdef;
-            case incMDD: return mdef;
-            case incEVA: return avoid;
-            case incACC: return acc;
-            case incSpeed: return speed;
-            case incJump: return jump;
-            default: return 0;
+            case incDEX:
+                return dex;
+            case incSTR:
+                return str;
+            case incINT:
+                return _int;
+            case incLUK:
+                return luk;
+            case incMHP:
+                return hp;
+            case incMMP:
+                return mp;
+            case incPAD:
+                return watk;
+            case incMAD:
+                return matk;
+            case incPDD:
+                return wdef;
+            case incMDD:
+                return mdef;
+            case incEVA:
+                return avoid;
+            case incACC:
+                return acc;
+            case incSpeed:
+                return speed;
+            case incJump:
+                return jump;
+            default:
+                return 0;
         }
     }
 
     /**
      * 设置当前属性值
-     * @param type 属性类型
+     * 
+     * @param type  属性类型
      * @param value 新的属性值
      */
     private void setCurrentStat(StatUpgrade type, int value) {
         switch (type) {
-            case incDEX: dex = (short) value; break;
-            case incSTR: str = (short) value; break;
-            case incINT: _int = (short) value; break;
-            case incLUK: luk = (short) value; break;
-            case incMHP: hp = (short) value; break;
-            case incMMP: mp = (short) value; break;
-            case incPAD: watk = (short) value; break;
-            case incMAD: matk = (short) value; break;
-            case incPDD: wdef = (short) value; break;
-            case incMDD: mdef = (short) value; break;
-            case incEVA: avoid = (short) value; break;
-            case incACC: acc = (short) value; break;
-            case incSpeed: speed = (short) value; break;
-            case incJump: jump = (short) value; break;
-            default: break;
+            case incDEX:
+                dex = (short) value;
+                break;
+            case incSTR:
+                str = (short) value;
+                break;
+            case incINT:
+                _int = (short) value;
+                break;
+            case incLUK:
+                luk = (short) value;
+                break;
+            case incMHP:
+                hp = (short) value;
+                break;
+            case incMMP:
+                mp = (short) value;
+                break;
+            case incPAD:
+                watk = (short) value;
+                break;
+            case incMAD:
+                matk = (short) value;
+                break;
+            case incPDD:
+                wdef = (short) value;
+                break;
+            case incMDD:
+                mdef = (short) value;
+                break;
+            case incEVA:
+                avoid = (short) value;
+                break;
+            case incACC:
+                acc = (short) value;
+                break;
+            case incSpeed:
+                speed = (short) value;
+                break;
+            case incJump:
+                jump = (short) value;
+                break;
+            default:
+                break;
         }
     }
 
     /**
      * 获取属性提升的提示消息
-     * @param type 属性类型
+     * 
+     * @param type  属性类型
      * @param value 属性增加值
      * @return 提示消息
      */
@@ -608,6 +697,7 @@ public class Equip extends Item {
 
     /**
      * 处理装备升级的逻辑，包括属性提升、升级槽增加、金锤子减少等，并通知客户端更新装备状态
+     * 
      * @param c 触发升级的客户端
      */
     private void gainLevel(Client c) {
@@ -627,39 +717,41 @@ public class Equip extends Item {
             isUpgradeable = false; // 标记装备不可升级
             improveDefaultStats(stats); // 生成默认属性升级列表
         }
-        UpgradeSlotProcessing(stats,equipLevel);    // 砸卷次数和减少金锤子次数判断
+        UpgradeSlotProcessing(stats, equipLevel); // 砸卷次数和减少金锤子次数判断
         if (isUpgradeable && stats.isEmpty()) {// 如果装备仍可升级且属性列表为空，则继续生成属性升级列表
             while (stats.isEmpty()) {
                 improveDefaultStats(stats);// 生成默认属性升级列表
-                UpgradeSlotProcessing(stats,equipLevel);// 砸卷次数和减少金锤子次数判断
+                UpgradeSlotProcessing(stats, equipLevel);// 砸卷次数和减少金锤子次数判断
             }
         }
 
         itemLevel++; // 提升装备等级
 
-        String lvupStr = I18nUtil.getMessage("Equip.gainStats.lvupStr", ii.getName(this.getItemId()), itemLevel) + "; ";  // 生成等级提升的提示消息
+        String lvupStr = I18nUtil.getMessage("Equip.gainStats.lvupStr", ii.getName(this.getItemId()), itemLevel) + "; "; // 生成等级提升的提示消息
 
-        Pair<String, Pair<Boolean, Boolean>> res = this.gainStats(stats);    // 调用 gainStats 计算属性提升和生成提示消息
+        Pair<String, Pair<Boolean, Boolean>> res = this.gainStats(stats); // 调用 gainStats 计算属性提升和生成提示消息
         lvupStr += res.getLeft(); // 拼接属性提升的提示消息
         boolean gotSlot = res.getRight().getLeft(); // 是否增加了升级槽
         boolean gotVicious = res.getRight().getRight(); // 是否减少了金锤子
 
         if (gotVicious) {// 如果减少了金锤子，追加提示消息
-            lvupStr += I18nUtil.getMessage("Equip.gainStats.Vicious","-1")  + "; ";
+            lvupStr += I18nUtil.getMessage("Equip.gainStats.Vicious", "-1") + "; ";
         }
 
         if (gotSlot) {// 如果增加了升级槽，追加提示消息
-            lvupStr += I18nUtil.getMessage("Equip.gainStats.UPGSLOT","+1")  + "; ";
+            lvupStr += I18nUtil.getMessage("Equip.gainStats.UPGSLOT", "+1") + "; ";
         }
 
         // 通知客户端更新装备状态
         c.getPlayer().equipChanged();
-        c.getPlayer().showHint(I18nUtil.getMessage("Equip.gainStats.showHint", ii.getName(this.getItemId()), itemLevel), 300); // 显示等级提升的消息
+        c.getPlayer().showHint(I18nUtil.getMessage("Equip.gainStats.showHint", ii.getName(this.getItemId()), itemLevel),
+                300); // 显示等级提升的消息
         c.getPlayer().dropMessage(6, lvupStr); // 显示属性提升的消息
 
         // 发送装备升级的效果包
         c.sendPacket(PacketCreator.showEquipmentLevelUp());
-        c.getPlayer().getMap().broadcastPacket(c.getPlayer(), PacketCreator.showForeignEffect(c.getPlayer().getId(), 15));
+        c.getPlayer().getMap().broadcastPacket(c.getPlayer(),
+                PacketCreator.showForeignEffect(c.getPlayer().getId(), 15));
         c.getPlayer().forceUpdateItem(this); // 强制更新装备状态
     }
 
@@ -668,8 +760,10 @@ public class Equip extends Item {
     }
 
     private static double normalizedMasteryExp(int reqLevel) {
-        // Conversion factor between mob exp and equip exp gain. Through many calculations, the expected for equipment levelup
-        // from level 1 to 2 is killing about 100~200 mobs of the same level range, on a 1x EXP rate scenario.
+        // Conversion factor between mob exp and equip exp gain. Through many
+        // calculations, the expected for equipment levelup
+        // from level 1 to 2 is killing about 100~200 mobs of the same level range, on a
+        // 1x EXP rate scenario.
 
         if (reqLevel < 5) {
             return 42;
@@ -686,7 +780,8 @@ public class Equip extends Item {
 
     /**
      * 处理装备经验值的增加逻辑（Ronan 的装备经验值获取方法）
-     * @param c 客户端对象
+     * 
+     * @param c    客户端对象
      * @param gain 获得的经验值
      */
     public synchronized void gainItemExp(Client c, int gain) {
@@ -694,7 +789,8 @@ public class Equip extends Item {
             return;
         }
 
-        int equipMaxLevel = Math.min(30, Math.max(ii.getEquipLevel(this.getItemId(), true), GameConfig.getServerInt("use_equipment_level_up")));// 计算装备的最大等级
+        int equipMaxLevel = Math.min(30,
+                Math.max(ii.getEquipLevel(this.getItemId(), true), GameConfig.getServerInt("use_equipment_level_up")));// 计算装备的最大等级
         if (itemLevel >= equipMaxLevel) {
             return;
         }
@@ -702,7 +798,8 @@ public class Equip extends Item {
         int reqLevel = ii.getEquipLevelReq(this.getItemId());// 获取装备的需求等级
 
         // 计算经验值修正因子
-        float masteryModifier = (GameConfig.getServerFloat("equip_exp_rate") * ExpTable.getExpNeededForLevel(1)) / (float) normalizedMasteryExp(reqLevel);
+        float masteryModifier = (GameConfig.getServerFloat("equip_exp_rate") * ExpTable.getExpNeededForLevel(1))
+                / (float) normalizedMasteryExp(reqLevel);
         float elementModifier = (isElemental) ? 0.85f : 0.6f;
 
         float baseExpGain = gain * elementModifier * masteryModifier;// 计算实际获得的经验值
@@ -712,10 +809,11 @@ public class Equip extends Item {
 
         // 调试信息：显示经验值获取详情
         if (GameConfig.getServerBoolean("use_debug_show_eqp_exp")) {
-            log.info("{} -> EXP Gain: {}, Mastery: {}, Base gain: {}, exp: {} / {}, Kills TNL: {}", ii.getName(getItemId()),
-                    gain, masteryModifier, baseExpGain, itemExp, expNeeded, expNeeded / (baseExpGain / c.getPlayer().getExpRate()));
+            log.info("{} -> EXP Gain: {}, Mastery: {}, Base gain: {}, exp: {} / {}, Kills TNL: {}",
+                    ii.getName(getItemId()),
+                    gain, masteryModifier, baseExpGain, itemExp, expNeeded,
+                    expNeeded / (baseExpGain / c.getPlayer().getExpRate()));
         }
-
 
         if (itemExp >= expNeeded) {// 判断是否需要升级
             while (itemExp >= expNeeded) {
@@ -751,7 +849,8 @@ public class Equip extends Item {
         }
 
         String eqpName = ii.getName(getItemId());
-        String eqpInfo = reachedMaxLevel() ? " #e#rMAX LEVEL#k#n" : (" EXP: #e#b" + (int) itemExp + "#k#n / " + ExpTable.getEquipExpNeededForLevel(itemLevel));
+        String eqpInfo = reachedMaxLevel() ? " #e#rMAX LEVEL#k#n"
+                : (" EXP: #e#b" + (int) itemExp + "#k#n / " + ExpTable.getEquipExpNeededForLevel(itemLevel));
 
         return "'" + eqpName + "' -> LV: #e#b" + itemLevel + "#k#n    " + eqpInfo + "\r\n";
     }
@@ -767,7 +866,8 @@ public class Equip extends Item {
     @Override
     public void setQuantity(short quantity) {
         if (quantity < 0 || quantity > 1) {
-            throw new RuntimeException("Setting the quantity to " + quantity + " on an equip (itemid: " + getItemId() + ")");
+            throw new RuntimeException(
+                    "Setting the quantity to " + quantity + " on an equip (itemid: " + getItemId() + ")");
         }
         super.setQuantity(quantity);
     }
