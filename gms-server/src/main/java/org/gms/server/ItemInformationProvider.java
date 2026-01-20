@@ -1140,9 +1140,9 @@ public class ItemInformationProvider {
                         break;
                 }
                 var level = nEquip.getOwner();
-                if (level == "[SSR]") {
+                if (level.equals("[SSR]")) {
                     prop += 20.0f;
-                } else if (level == "[SR]") {
+                } else if (level.equals("[SR]")) {
                     prop += 10.0f;
                 }
                 if (prop > 100.0f) {
@@ -1198,7 +1198,7 @@ public class ItemInformationProvider {
                     }
                     if (Randomizer.nextInt(100) < stats.get("cursed")) {
                         String equipLevel = nEquip.getOwner();
-                        if (equipLevel == "[SSR]" || equipLevel == "[SR]") {
+                        if (equipLevel.equals("[SSR]") || equipLevel.equals("[SR]")) {
                             return nEquip; // SSR 和 SR 装备不会被卷轴诅咒摧毁
                         } else {
                             return null; // 卷轴诅咒装备，返回 null 表示装备被摧毁

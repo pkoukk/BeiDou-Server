@@ -366,9 +366,9 @@ public class Equip extends Item {
 
         double minPool = 0.0;
         var equipLevel = this.getOwner();
-        if (equipLevel == "[SSR]") {
+        if (equipLevel.equals("[SSR]")) {
             minPool = 1.0;
-        } else if (equipLevel == "[SR]") {
+        } else if (equipLevel.equals("[SR]")) {
             minPool = 0.5;
         }
 

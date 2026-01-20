@@ -107,7 +107,7 @@ public final class ScrollHandler extends AbstractPacketHandler {
                 }
 
                 var equipLevel = toScroll.getOwner();
-                if (equipLevel == "[SSR]" || equipLevel == "[SR]") {
+                if (equipLevel.equals("[SSR]") || equipLevel.equals("[SR]")) {
                     c.getPlayer().message("正在强化" + equipLevel + "装备，获得了神秘的加成");
                 }
                 Equip scrolled = (Equip) ii.scrollEquipWithId(toScroll, scroll.getItemId(), whiteScroll, 0, chr.isGM()); // 使用卷轴升级装备

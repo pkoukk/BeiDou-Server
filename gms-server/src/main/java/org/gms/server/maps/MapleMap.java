@@ -706,7 +706,7 @@ public class MapleMap {
                 } else {
                     if (ItemConstants.getInventoryType(de.itemId) == InventoryType.EQUIP) {
                         idrop = ii.randomizeStats((Equip) ii.getEquipById(de.itemId));
-                        if (idrop.getOwner() == "[SSR]" || idrop.getOwner() == "[SR]") {
+                        if (idrop.getOwner().equals("[SSR]") || idrop.getOwner().equals("[SR]")) {
                             dropMessage(6, "一道金光闪过，掉落了" + idrop.getOwner() + "装备！");
                         }
                     } else {
