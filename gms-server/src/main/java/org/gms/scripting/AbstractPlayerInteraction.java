@@ -43,6 +43,7 @@ import org.gms.scripting.event.EventInstanceManager;
 import org.gms.scripting.event.EventManager;
 import org.gms.scripting.npc.NPCScriptManager;
 import org.gms.server.ItemInformationProvider;
+import org.gms.server.MapInformationProvider;
 import org.gms.server.Marriage;
 import org.gms.server.expeditions.Expedition;
 import org.gms.server.expeditions.ExpeditionBossLog;
@@ -1420,8 +1421,8 @@ public class AbstractPlayerInteraction {
         }
 
         // 获取这些怪物所在的地图
-        // TODO: 实现获取怪物所在地图的逻辑
-        Map<Integer, Map<Integer, Integer>> mapMonsters = null;
+        MapInformationProvider mapInfo = MapInformationProvider.getInstance();
+        Map<Integer, Map<Integer, Integer>> mapMonsters = mapInfo.getMapsByMonsterIds(monsterIds);
 
         // 计算每个地图的权重
         Map<Integer, MapRecommendation> mapRecommendations = new HashMap<>();
