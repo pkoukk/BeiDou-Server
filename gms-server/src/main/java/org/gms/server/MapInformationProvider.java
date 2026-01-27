@@ -63,7 +63,7 @@ public class MapInformationProvider {
      */
     public synchronized void initialize() {
         if (initialized) {
-            return;
+        return;
         }
 
         log.info("开始初始化地图信息...");
@@ -73,30 +73,35 @@ public class MapInformationProvider {
             DataDirectoryEntry root = mapData.getRoot();
 
             // 遍历所有地图文件夹
-            for (DataDirectoryEntry mapDir : root.getSubdirectories()) {
-                if (!mapDir.getName().startsWith("Map")) {
+            for (DataDirectoryEntry mapTop : root.getSubdirectories()) {
+                if (!mapTop.getName().startsWith("Map")) {
                     continue;
                 }
 
-                // 遍历文件夹中的所有地图文件
-                for (DataFileEntry mapFile : mapDir.getFiles()) {
-                    try {
-                        String fileName = mapFile.getName();
-                        // 地图文件名格式：xxxxxxxxx.img
-                        if (fileName.endsWith(".img")) {
-                            String mapIdStr = fileName.substring(0, fileName.length() - 4);
-                            int mapId = Integer.parseInt(mapIdStr);
+                for (DataDirectoryEntry mapDir : mapTop.getSubdirectories()) {
+                    if (!mapDir.getName().startsWith("Map")) {
+                        continue;
+                    }
+                    // 遍历文件夹中的所有地图文件
+                    for (DataFileEntry mapFile : mapDir.getFiles()) {
+                        try {
+                            String fileName = mapFile.getName();
+                            // 地图文件名格式：xxxxxxxxx.img
+                            if (fileName.endsWith(".img")) {
+                                String mapIdStr = fileName.substring(0, fileName.length() - 4);
+                                int mapId = Integer.parseInt(mapIdStr);
 
-                            // 解析这个地图的怪物数据
-                            parseMapMonsters(mapId, mapDir.getName() + "/" + fileName);
+                                // 解析这个地图的怪物数据
+                                parseMapMonsters(mapId,mapTop.getName() + "/" + mapDir.getName() + "/" + fileName);
+                            }
+                        } catch (Exception e) {
+                            log.warn("解析地图文件失败: " + mapFile.getName(), e);
                         }
-                    } catch (Exception e) {
-                        log.warn("解析地图文件失败: " + mapFile.getName(), e);
                     }
                 }
             }
 
-            initialized = true;
+            initialized = mapMonsterCache.size()>0;
             long endTime = System.currentTimeMillis();
             log.info("地图信息初始化完成，耗时: {}ms，共解析 {} 个地图，{} 种怪物",
                     endTime - startTime, mapMonsterCache.size(), monsterMapCache.size());
