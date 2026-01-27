@@ -136,6 +136,9 @@ public class ItemInformationProvider {
     protected Map<Integer, Pair<Integer, Set<Integer>>> cashPetFoodCache = new HashMap<>();
     protected Map<Integer, QuestConsItem> questItemConsCache = new HashMap<>();
     protected Map<Integer, ItemCashInfo> itemCashInfoCache = new HashMap<>();
+    // 装备按职业和等级分组缓存: Map<jobId, Map<levelGroup, List<itemId>>>
+    protected Map<Integer, Map<Integer, List<Integer>>> equipByJobAndLevelCache = new HashMap<>();
+    protected boolean equipCacheInitialized = false;
 
     private ItemInformationProvider() {
         loadCardIdData();
@@ -2486,6 +2489,185 @@ public class ItemInformationProvider {
         public boolean runOnPickup() {
             return runOnPickup;
         }
+    }
+
+    /**
+     * 初始化装备缓存，按职业和等级分组
+     * 等级每5级为一组
+     */
+    private synchronized void initEquipCache() {
+        if (equipCacheInitialized) {
+            return;
+        }
+
+        log.info("开始初始化装备缓存...");
+
+        // 遍历所有装备
+        Data eqpData = stringData.getData("Eqp.img").getChildByPath("Eqp");
+        if (eqpData != null) {
+            for (Data eqpType : eqpData.getChildren()) {
+                for (Data itemFolder : eqpType.getChildren()) {
+                    try {
+                        int itemId = Integer.parseInt(itemFolder.getName());
+
+                        // 排除cash装备
+                        if (isCash(itemId)) {
+                            continue;
+                        }
+
+                        Map<String, Integer> stats = getEquipStats(itemId);
+                        if (stats == null) {
+                            continue;
+                        }
+
+                        int reqLevel = stats.getOrDefault("reqLevel", 0);
+                        int reqJob = stats.getOrDefault("reqJob", 0);
+
+                        // 将等级按5级分组
+                        int levelGroup = reqLevel / 5;
+
+                        // 处理reqJob，添加到对应的职业缓存中
+                        List<Integer> jobIds = getJobIdsFromReqJob(reqJob);
+                        for (int jobId : jobIds) {
+                            equipByJobAndLevelCache
+                                    .computeIfAbsent(jobId, k -> new HashMap<>())
+                                    .computeIfAbsent(levelGroup, k -> new ArrayList<>())
+                                    .add(itemId);
+                        }
+                    } catch (Exception e) {
+                        log.error("处理装备缓存时出错: {}", itemFolder.getName(), e);
+                    }
+                }
+            }
+        }
+
+        equipCacheInitialized = true;
+        log.info("装备缓存初始化完成");
+    }
+
+    /**
+     * 根据reqJob值解析出适用的职业ID列表
+     */
+    private List<Integer> getJobIdsFromReqJob(int reqJob) {
+        List<Integer> jobIds = new ArrayList<>();
+
+        if (reqJob == 0) {
+            // reqJob为0表示所有职业都可以装备
+            jobIds.add(0);
+            return jobIds;
+        }
+
+        // 解析reqJob位标志
+        // 0x01 = 战士, 0x02 = 法师, 0x04 = 弓箭手, 0x08 = 飞侠, 0x10 = 海盗
+        if ((reqJob & 0x01) != 0)
+            jobIds.add(100); // 战士
+        if ((reqJob & 0x02) != 0)
+            jobIds.add(200); // 法师
+        if ((reqJob & 0x04) != 0)
+            jobIds.add(300); // 弓箭手
+        if ((reqJob & 0x08) != 0)
+            jobIds.add(400); // 飞侠
+        if ((reqJob & 0x10) != 0)
+            jobIds.add(500); // 海盗
+
+        if (jobIds.isEmpty()) {
+            // 如果解析不出来，添加到通用职业
+            jobIds.add(0);
+        }
+
+        return jobIds;
+    }
+
+    /**
+     * 根据职业和等级范围获取装备列表
+     * 
+     * @param job      职业
+     * @param minLevel 最小等级
+     * @param maxLevel 最大等级
+     * @return 装备ID列表
+     */
+    public List<Integer> getEquipsByJobAndLevel(Job job, int minLevel, int maxLevel) {
+        if (!equipCacheInitialized) {
+            initEquipCache();
+        }
+
+        List<Integer> result = new ArrayList<>();
+        int jobId = job.getId() / 100 * 100; // 获取职业基础ID (100, 200, 300, 400, 500)
+
+        int minLevelGroup = minLevel / 5;
+        int maxLevelGroup = maxLevel / 5;
+
+        // 获取该职业的装备
+        Map<Integer, List<Integer>> jobEquips = equipByJobAndLevelCache.get(jobId);
+        if (jobEquips != null) {
+            for (int levelGroup = minLevelGroup; levelGroup <= maxLevelGroup; levelGroup++) {
+                List<Integer> equips = jobEquips.get(levelGroup);
+                if (equips != null) {
+                    result.addAll(equips);
+                }
+            }
+        }
+
+        // 添加通用装备（reqJob=0）
+        Map<Integer, List<Integer>> commonEquips = equipByJobAndLevelCache.get(0);
+        if (commonEquips != null) {
+            for (int levelGroup = minLevelGroup; levelGroup <= maxLevelGroup; levelGroup++) {
+                List<Integer> equips = commonEquips.get(levelGroup);
+                if (equips != null) {
+                    result.addAll(equips);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 根据装备ID列表查询掉落信息
+     * 
+     * @param itemIds 装备ID列表
+     * @return Map<itemId, List<DropInfo>> 其中DropInfo包含dropperid和chance
+     */
+    public Map<Integer, List<Pair<Integer, Integer>>> getDropInfoByItems(List<Integer> itemIds) {
+        Map<Integer, List<Pair<Integer, Integer>>> result = new HashMap<>();
+
+        if (itemIds == null || itemIds.isEmpty()) {
+            return result;
+        }
+
+        try (Connection con = DatabaseConnection.getConnection()) {
+            // 构建IN子句
+            StringBuilder inClause = new StringBuilder();
+            for (int i = 0; i < itemIds.size(); i++) {
+                if (i > 0)
+                    inClause.append(",");
+                inClause.append("?");
+            }
+
+            String query = "SELECT itemid, dropperid, chance FROM drop_data WHERE itemid IN (" + inClause
+                    + ") ORDER BY itemid, dropperid";
+
+            try (PreparedStatement ps = con.prepareStatement(query)) {
+                for (int i = 0; i < itemIds.size(); i++) {
+                    ps.setInt(i + 1, itemIds.get(i));
+                }
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int itemId = rs.getInt("itemid");
+                        int dropperId = rs.getInt("dropperid");
+                        int chance = rs.getInt("chance");
+
+                        result.computeIfAbsent(itemId, k -> new ArrayList<>())
+                                .add(new Pair<>(dropperId, chance));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("查询装备掉落信息时出错", e);
+        }
+
+        return result;
     }
 
     public static final class RewardItem {
