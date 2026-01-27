@@ -57,7 +57,7 @@ function action(mode, type, selection) {
         }
 
         if (cm.getPlayer().getLevel()>=20) {
-        text += "#L9#快速转职#l\t #L12#血衣合成#l \t #L16#删除道具#l\r\n";
+        text += "#L9#快速转职#l\t #L12#血衣合成#l \t #L16#掉宝地图#l\r\n";
        }
 
         if (cm.getPlayer().getLevel()>=30) {
@@ -158,7 +158,7 @@ function doSelect(selection) {
             openNpc("随身仓库");
             break;
         case 16:
-            openNpc("删除道具");
+            openNpc("掉宝地图");
             break;
         case 17:
             openNpc("益智答题");
