@@ -1388,9 +1388,33 @@ public class AbstractPlayerInteraction {
             Character player = c.getPlayer();
             int playerLevel = player.getLevel() / 5 * 5; // align to nearest 5
             var playerJob = player.getJob().getJobNiche();
+            List<Integer> jobList = new ArrayList<>();
+            jobList.add(0); // all jobs
+            switch (playerJob) {
+                case 1: // Warrior
+                    jobList.add(1);
+                    break;
+                case 2: // Magician
+                    jobList.add(2);
+                    break;
+                case 3: // Bowman
+                    jobList.add(4);
+                    break;
+                case 4: // Thief
+                    jobList.add(8);
+                    break;
+                case 5: // Pirate
+                    jobList.add(16);
+                    break;
+                default:
+                    break;
+            }
+            // jobList.add(1 << playerJob-1);
+
+            int minLevel = playerLevel - 15 > 0 ? playerLevel - 15 : 1;
+            int maxLevel = playerLevel + 15;
             var ii = ItemInformationProvider.getInstance();
-            var jobList = List.of(playerJob, 0);
-            return ii.getRecommendDropMap(jobList, playerLevel - 10 > 0 ? playerLevel - 10 : 1, playerLevel + 10, null,
+            return ii.getRecommendDropMap(jobList, minLevel, maxLevel, null,
                     includeBoos, null);
         } catch (Exception e) {
             e.printStackTrace();
