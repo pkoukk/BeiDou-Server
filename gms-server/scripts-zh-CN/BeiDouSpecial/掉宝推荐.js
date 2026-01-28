@@ -49,18 +49,17 @@ function action(mode, type, selection) {
 
     // 处理分页逻辑 (如果 selection < 0，说明是点击了上一页/下一页，保持在 status 1)
     if (selection < 0) {
-      // 这是一个技巧，防止 status 自动增加进入 step 2
-      // 因为上一轮 action(1,...) 导致 status 变成了 1，如果这里不处理，下次会变成2
-      // 但这里我们已经在 status 1 了，且因为 mode=1 进来的，所以不需要额外操作 status
-      // 只需要根据 selection 的值变动 page
+      // 处理翻页
       var cmd = selection;
-      if (cmd == -999) {
+      if (cmd === -999) {
         // 下一页
         page++;
-      } else if (cmd == -998) {
+      } else if (cmd === -998) {
         // 上一页
         page--;
       }
+      // 关键：减少 status 以抵消开头的 status++，保持在 status 1
+      status--;
     }
 
     // 检查数据是否为空
@@ -118,19 +117,12 @@ function action(mode, type, selection) {
   } else if (status === 2) {
     // 第二层：处理具体地图点击
     // selection 即为 list 中的 index
-    // 注意：如果是翻页按钮进来的，已经在 status 1 处理了，不会进 status 2，
-    // 除非我们手动控制 status，但在上面的逻辑中，点击翻页按钮通常会再次触发 action，
-    // 这里需要区分：是点击了“地图”还是“翻页”。
 
-    // 由于翻页按钮的 selection 是负数，我们需要在 status 1 内部处理循环，
-    // 或者在这里判断。为了代码清晰，建议在 status 1 处理完翻页后，
-    // 发送 sendSimple，这样下一次 action 会再次进入 status + 1。
-    // *修正逻辑*：标准的 switch-case status 流程中，如果不手动降 status，点击翻页(selection -999)会进入 status 2。
-
+    // 如果误触发到这里且是翻页按钮（理论上不应该，因为在 status 1 已经处理了）
+    // 直接回退到 status 0，让下次重新进入 status 1
     if (selection < 0) {
-      // 如果是翻页代码，我们需要回退到 status 1 并重新渲染
-      status = 1;
-      action(1, 0, selection); // 递归调用处理翻页
+      status = 0;
+      action(1, 0, 0);
       return;
     }
 
