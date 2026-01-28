@@ -2463,6 +2463,113 @@ public class ItemInformationProvider {
         return ret;
     }
 
+    /**
+     * 查询推荐的装备掉落地图
+     * 
+     * @param jobs     职业列表（可以为null或空，表示不限职业）
+     * @param minLevel 最低等级
+     * @param maxLevel 最高等级
+     * @param slot     装备部位（可以为null，表示不限部位）
+     * @param isBoss   是否只查询BOSS掉落（null表示不限，true表示只要BOSS，false表示只要非BOSS）
+     * @param mapId    地图ID（可以为null，表示不限地图）
+     * @return 按总掉率降序排列的地图掉落信息列表
+     */
+    public List<MapDropInfo> getRecommendDropMap(List<Integer> jobs, int minLevel, int maxLevel, String slot,
+            Boolean isBoss, Integer mapId) {
+        List<MapDropInfo> result = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT v.mapId,  ")
+                .append("m.name AS mapName, ")
+                .append("SUM(v.map_chance_contribution) AS total_chance, ")
+                .append("MAX(v.is_boss) AS has_boss, ")
+                .append("GROUP_CONCAT(DISTINCT v.item_id SEPARATOR ', ') AS items ")
+                .append("FROM view_map_item_drops v ")
+                .append("LEFT JOIN search_maps m ON v.mapId = m.id ")
+                .append("WHERE 1=1 ");
+
+        List<Object> params = new ArrayList<>();
+
+        // 职业条件
+        if (jobs != null && !jobs.isEmpty()) {
+            sql.append("AND v.item_job IN (");
+            for (int i = 0; i < jobs.size(); i++) {
+                sql.append("?");
+                if (i < jobs.size() - 1) {
+                    sql.append(", ");
+                }
+                params.add(jobs.get(i));
+            }
+            sql.append(") ");
+        }
+
+        // 等级范围
+        sql.append("AND v.item_level BETWEEN ? AND ? ");
+        params.add(minLevel);
+        params.add(maxLevel);
+
+        // 装备部位
+        if (slot != null && !slot.trim().isEmpty()) {
+            sql.append("AND v.item_slot = ? ");
+            params.add(slot);
+        }
+
+        // BOSS条件
+        if (isBoss != null) {
+            sql.append("AND v.is_boss = ? ");
+            params.add(isBoss ? 1 : 0);
+        }
+
+        // 地图ID条件
+        if (mapId != null) {
+            sql.append("AND v.mapId = ? ");
+            params.add(mapId);
+        }
+
+        sql.append("GROUP BY v.mapId,m.name ")
+                .append("ORDER BY total_chance DESC ")
+                .append("LIMIT 20");
+
+        try (Connection con = DatabaseConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            // 设置参数
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int mid = rs.getInt("mapId");
+                    String mapName = rs.getString("mapName");
+                    long totalChance = rs.getLong("total_chance");
+                    boolean hasBoss = rs.getInt("has_boss") == 1;
+                    String itemsStr = rs.getString("items");
+
+                    // 解析物品ID列表
+                    List<Integer> itemList = new ArrayList<>();
+                    if (itemsStr != null && !itemsStr.isEmpty()) {
+                        String[] itemIds = itemsStr.split(",\\s*");
+                        for (String itemId : itemIds) {
+                            try {
+                                itemList.add(Integer.parseInt(itemId.trim()));
+                            } catch (NumberFormatException e) {
+                                log.warn("Invalid item id format: {}", itemId, e);
+                            }
+                        }
+                    }
+
+                    result.add(new MapDropInfo(mid, totalChance, hasBoss, itemList, mapName));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error querying recommend drop map with params: jobs={}, level={}-{}, slot={}, isBoss={}",
+                    jobs, minLevel, maxLevel, slot, isBoss, e);
+        }
+
+        return result;
+    }
+
     public class ScriptedItem {
 
         private final boolean runOnPickup;
@@ -2511,5 +2618,41 @@ public class ItemInformationProvider {
         public int maxDays;
         public long addTime;
 
+    }
+
+    public static final class MapDropInfo {
+        private final int mapId;
+        private final long totalChance;
+        private final boolean hasBoss;
+        private final List<Integer> items;
+        private final String mapName;
+
+        public MapDropInfo(int mapId, long totalChance, boolean hasBoss, List<Integer> items, String mapName) {
+            this.mapId = mapId;
+            this.totalChance = totalChance;
+            this.hasBoss = hasBoss;
+            this.items = items;
+            this.mapName = mapName;
+        }
+
+        public int getMapId() {
+            return mapId;
+        }
+
+        public long getTotalChance() {
+            return totalChance;
+        }
+
+        public boolean isHasBoss() {
+            return hasBoss;
+        }
+
+        public List<Integer> getItems() {
+            return items;
+        }
+
+        public String getMapName() {
+            return mapName;
+        }
     }
 }
