@@ -1429,7 +1429,7 @@ public class AbstractPlayerInteraction {
             var playerJob = player.getJob().getJobNiche();
             var ii = ItemInformationProvider.getInstance();
             var jobList = List.of(playerJob, 0);
-            return ii.getRecommendDropMap(jobList, playerLevel - 10 > 0 ? playerLevel - 10 : 1, playerLevel + 10, null,
+            return ii.getRecommendDropMap(jobList, playerLevel - 5 > 0 ? playerLevel - 5 : 1, playerLevel + 10, null,
                     includeBoos, specMapId);
         } catch (Exception e) {
             e.printStackTrace();
