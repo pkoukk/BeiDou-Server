@@ -704,7 +704,7 @@ public class Character extends AbstractCharacterObject {
     public int addDojoPointsByMap(int mapId) {
         int pts = 0;
         if (dojoPoints < 17000) {
-            pts = 1 + ((mapId - 1) / 100 % 100) / 6;
+            pts = 1 + ((mapId - 1) / 100 % 100) / 2;
             if (!MapId.isPartyDojo(this.getMapId())) {
                 pts++;
             }
