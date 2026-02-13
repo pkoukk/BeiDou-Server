@@ -1141,9 +1141,9 @@ public class ItemInformationProvider {
                 }
                 var level = nEquip.getOwner();
                 if (level.equals("[SSR]")) {
-                    prop += 20.0f;
+                    prop += 40.0f;
                 } else if (level.equals("[SR]")) {
-                    prop += 10.0f;
+                    prop += 20.0f;
                 }
                 if (prop > 100.0f) {
                     prop = 100.0f;

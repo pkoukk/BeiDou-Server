@@ -789,8 +789,14 @@ public class Equip extends Item {
             return;
         }
 
-        int equipMaxLevel = Math.min(30,
-                Math.max(ii.getEquipLevel(this.getItemId(), true), GameConfig.getServerInt("use_equipment_level_up")));// 计算装备的最大等级
+        int sourceMaxLevel = Math.max(ii.getEquipLevel(this.getItemId(), true),
+                GameConfig.getServerInt("use_equipment_level_up"));
+        if (this.getOwner().equals("[SSR]")) {
+            sourceMaxLevel += 10;
+        } else if (this.getOwner().equals("[SR]")) {
+            sourceMaxLevel += 5;
+        }
+        int equipMaxLevel = Math.min(30, sourceMaxLevel);// 计算装备的最大等级
         if (itemLevel >= equipMaxLevel) {
             return;
         }
