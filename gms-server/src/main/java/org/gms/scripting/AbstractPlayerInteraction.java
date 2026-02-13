@@ -1436,4 +1436,69 @@ public class AbstractPlayerInteraction {
             return Collections.emptyList();
         }
     }
+
+    public boolean RefineEquip() {
+        // refine player's equip
+        // logic: if user's first 4 equip is same, do refine
+        // same logic : same itemid and same owner
+        // refine logic: if 4 same equip, refine to next level
+        // level: no onwer -> [SR] -> [SSR]
+        try {
+            Character player = c.getPlayer();
+            Inventory inv = player.getInventory(InventoryType.EQUIP);
+            List<Equip> targets = new ArrayList<>(4);
+
+            for (short slot = 1; slot <= 4; slot++) {
+                Item item = inv.getItem(slot);
+                if (!(item instanceof Equip equip)) {
+                    return false;
+                }
+                targets.add(equip);
+            }
+
+            Equip first = targets.get(0);
+            int itemId = first.getItemId();
+            String owner = first.getOwner() == null ? "" : first.getOwner();
+
+            for (Equip equip : targets) {
+                String equipOwner = equip.getOwner() == null ? "" : equip.getOwner();
+                if (equip.getItemId() != itemId || !equipOwner.equals(owner)) {
+                    c.getPlayer().dropMessage(5, "精炼需求前4件装备必须完全相同。");
+                    return false;
+                }
+            }
+
+            int refineLevel;
+            if (owner.isEmpty()) {
+                refineLevel = 1;
+            } else if (owner.equals("[SR]")) {
+                refineLevel = 2;
+            } else {
+                c.getPlayer().dropMessage(5, "无法精炼的装备");
+                return false;
+            }
+
+            int itemMeso = ItemInformationProvider.getInstance().getMeso(first.getItemId());
+            int costMeso = itemMeso * 4;
+            if (player.getMeso() < costMeso) {
+                c.getPlayer().dropMessage(5, "精炼需要 " + costMeso + " 金币。");
+                return false;
+            }
+
+            Equip refined = (Equip) first.copy();
+            refined = ItemInformationProvider.getInstance().randomizeStats(refined, refineLevel);
+
+            for (short slot = 1; slot <= 4; slot++) {
+                InventoryManipulator.removeFromSlot(c, InventoryType.EQUIP, slot, (short) 1, false);
+            }
+
+            InventoryManipulator.addFromDrop(c, refined, false);
+            player.gainMeso(-costMeso, false);
+            c.sendPacket(PacketCreator.getShowItemGain(refined.getItemId(), (short) 1, true));
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

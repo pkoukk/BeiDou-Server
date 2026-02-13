@@ -1382,6 +1382,36 @@ public class ItemInformationProvider {
         return equip;
     }
 
+    public Equip randomizeStats(Equip equip, int level) {
+        switch (level) {
+            case 1:
+                equip = randomizeStatsEnhance(equip, 0.2, 30);
+                equip.setOwner("[SR]");
+                break;
+            case 2:
+                equip = randomizeStatsEnhance(equip, 0.3, 50);
+                equip.setOwner("[SSR]");
+            default:
+                equip.setStr(getRandStat(equip.getStr(), 5));
+                equip.setDex(getRandStat(equip.getDex(), 5));
+                equip.setInt(getRandStat(equip.getInt(), 5));
+                equip.setLuk(getRandStat(equip.getLuk(), 5));
+                equip.setMatk(getRandStat(equip.getMatk(), 5));
+                equip.setWatk(getRandStat(equip.getWatk(), 5));
+                equip.setAcc(getRandStat(equip.getAcc(), 5));
+                equip.setAvoid(getRandStat(equip.getAvoid(), 5));
+                equip.setJump(getRandStat(equip.getJump(), 5));
+                equip.setSpeed(getRandStat(equip.getSpeed(), 5));
+                equip.setWdef(getRandStat(equip.getWdef(), 10));
+                equip.setMdef(getRandStat(equip.getMdef(), 10));
+                equip.setHp(getRandStat(equip.getHp(), 10));
+                equip.setMp(getRandStat(equip.getMp(), 10));
+                break;
+        }
+
+        return equip;
+    }
+
     private static short getRandUpgradedStat(short defaultValue, int maxRange) {
         if (defaultValue == 0) {
             return 0;
