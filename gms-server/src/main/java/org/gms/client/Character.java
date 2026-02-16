@@ -2456,7 +2456,8 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void dispel() {
-        if (!(GameConfig.getServerBoolean("use_undispel_holy_shield") && this.hasActiveBuff(Bishop.HOLY_SHIELD))) {
+        if (!(GameConfig.getServerBoolean("use_undispel_holy_shield")
+                && this.hasActiveBuff(Bishop.HOLY_SHIELD))) {
             List<BuffStatValueHolder> mbsvhList = getAllStatups();
             for (BuffStatValueHolder mbsvh : mbsvhList) {
                 if (mbsvh.effect.isSkill()) {
@@ -2465,6 +2466,9 @@ public class Character extends AbstractCharacterObject {
                         cancelEffect(mbsvh.effect, false, mbsvh.startTime);
                     }
                 }
+            }
+            if (this.getAutoBuffEnabled()) {
+                autoBuffTick();
             }
         }
     }
@@ -9927,8 +9931,8 @@ public class Character extends AbstractCharacterObject {
             new AutoBuffDef(2301004, 30, 1000), // 祝福
             new AutoBuffDef(1301007, 40, 2000), // 神圣之火
             new AutoBuffDef(4111001, 50, 2500), // 聚财术
-             new AutoBuffDef(3121002, 100, 3000), // 火眼晶晶
-              new AutoBuffDef(5121009, 100, 3000) // 极速领域
+            new AutoBuffDef(3121002, 100, 3000), // 火眼晶晶
+            new AutoBuffDef(5121009, 100, 3000) // 极速领域
     );
 
     public void autoBuffTick() {
