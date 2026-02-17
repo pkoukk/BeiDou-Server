@@ -37,11 +37,18 @@ public class AutoBuffInstance {
         }, refresh);
     }
 
+    public void refresh() {
+        if (task != null) {
+            task.cancel(false);
+        }
+        start();
+    }
+
     private boolean shouldContinue() {
         return chr.isLoggedIn()
-            && chr.isAlive()
-            && chr.getAutoBuffEnabled()
-            && chr.hasAutoBuff(skillId);
+                && chr.isAlive()
+                && chr.getAutoBuffEnabled()
+                && chr.hasAutoBuff(skillId);
     }
 
     public void stop() {

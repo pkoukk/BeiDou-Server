@@ -2467,8 +2467,9 @@ public class Character extends AbstractCharacterObject {
                     }
                 }
             }
+            log.info(I18nUtil.getLogMessage("Character.dispel.info", getName()));
             if (this.getAutoBuffEnabled()) {
-                autoBuffTick();
+                this.refreshAllAutoBuff();
             }
         }
     }
@@ -9913,6 +9914,12 @@ public class Character extends AbstractCharacterObject {
         AutoBuffInstance inst = new AutoBuffInstance(this, skillId, level);
         autoBuffs.put(skillId, inst);
         inst.start();
+    }
+
+    private void refreshAllAutoBuff() {
+        for (AutoBuffInstance inst : autoBuffs.values()) {
+            inst.refresh();
+        }
     }
 
     public void removeAutoBuff(int skillId) {
