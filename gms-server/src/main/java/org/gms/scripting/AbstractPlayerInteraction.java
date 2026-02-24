@@ -1498,6 +1498,7 @@ public class AbstractPlayerInteraction {
 
                 refined = (Equip) first.copy();
                 refined = ii.randomizeStats(refined, refineLevel);
+                InventoryManipulator.removeFromSlot(c, InventoryType.EQUIP, (short) 1, (short) 1, false);
             } else {
                 int itemMeso = ii.getMeso(first.getItemId());
                 costMeso = itemMeso * 4;
