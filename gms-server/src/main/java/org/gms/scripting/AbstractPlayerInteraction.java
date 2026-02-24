@@ -1462,11 +1462,17 @@ public class AbstractPlayerInteraction {
             int itemId = first.getItemId();
             String owner = first.getOwner() == null ? "" : first.getOwner();
 
-            for (Equip equip : targets) {
-                String equipOwner = equip.getOwner() == null ? "" : equip.getOwner();
-                if (equip.getItemId() != itemId || !equipOwner.equals(owner)) {
-                    c.getPlayer().dropMessage(5, "精炼需求前4件装备必须完全相同。");
-                    return false;
+            int refineType = 0;
+            ItemInformationProvider ii = ItemInformationProvider.getInstance();
+            if (ii.isPickupRestricted(first.getItemId())) {
+                refineType = 1;
+            } else {
+                for (Equip equip : targets) {
+                    String equipOwner = equip.getOwner() == null ? "" : equip.getOwner();
+                    if (equip.getItemId() != itemId || !equipOwner.equals(owner)) {
+                        c.getPlayer().dropMessage(5, "精炼需求前4件装备必须完全相同。");
+                        return false;
+                    }
                 }
             }
 
@@ -1480,18 +1486,31 @@ public class AbstractPlayerInteraction {
                 return false;
             }
 
-            int itemMeso = ItemInformationProvider.getInstance().getMeso(first.getItemId());
-            int costMeso = itemMeso * 4;
-            if (player.getMeso() < costMeso) {
-                c.getPlayer().dropMessage(5, "精炼需要 " + costMeso + " 金币。");
-                return false;
-            }
+            int costMeso = 0;
+            Equip refined = null;
 
-            Equip refined = (Equip) first.copy();
-            refined = ItemInformationProvider.getInstance().randomizeStats(refined, refineLevel);
+            if (refineType == 1) {
+                costMeso = ii.getMeso(first.getItemId()) * 4 * 10 * refineLevel;
+                if (player.getMeso() < costMeso) {
+                    c.getPlayer().dropMessage(5, "精炼需要 " + costMeso + " 金币。");
+                    return false;
+                }
 
-            for (short slot = 1; slot <= 4; slot++) {
-                InventoryManipulator.removeFromSlot(c, InventoryType.EQUIP, slot, (short) 1, false);
+                refined = (Equip) first.copy();
+                refined = ii.randomizeStats(refined, refineLevel);
+            } else {
+                int itemMeso = ii.getMeso(first.getItemId());
+                costMeso = itemMeso * 4;
+                if (player.getMeso() < costMeso) {
+                    c.getPlayer().dropMessage(5, "精炼需要 " + costMeso + " 金币。");
+                    return false;
+                }
+
+                refined = (Equip) first.copy();
+                refined = ii.randomizeStats(refined, refineLevel);
+                for (short slot = 1; slot <= 4; slot++) {
+                    InventoryManipulator.removeFromSlot(c, InventoryType.EQUIP, slot, (short) 1, false);
+                }
             }
 
             InventoryManipulator.addFromDrop(c, refined, false);
