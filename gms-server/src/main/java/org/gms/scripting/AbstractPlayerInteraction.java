@@ -1383,6 +1383,7 @@ public class AbstractPlayerInteraction {
         return getPlayer().getCurrentOnlineTime();
     }
 
+    // 获取推荐地图信息
     public List<MapDropInfo> getPlayerRecommandMapInfo(Boolean includeBoos) {
         try {
             Character player = c.getPlayer();
@@ -1412,6 +1413,7 @@ public class AbstractPlayerInteraction {
             // jobList.add(1 << playerJob-1);
 
             int minLevel = playerLevel - 15 > 0 ? playerLevel - 15 : 1;
+            minLevel = minLevel >= 100 ? 100 : minLevel;
             int maxLevel = playerLevel + 15;
             var ii = ItemInformationProvider.getInstance();
             return ii.getRecommendDropMap(jobList, minLevel, maxLevel, null,

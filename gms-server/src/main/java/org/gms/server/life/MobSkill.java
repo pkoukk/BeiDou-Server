@@ -215,7 +215,7 @@ public class MobSkill {
             case POISON -> disease = Disease.POISON;
             case SLOW -> disease = Disease.SLOW;
             case DISPEL -> applyDispelEffect(skill, monster, player);
-            case SEDUCE -> disease = Disease.SEDUCE;
+            case SEDUCE -> disease = Disease.STUN; // 取消魅惑，太恶心人了，改为眩晕
             case BANISH -> applyBanishEffect(skill, monster, player, banishPlayersOutput);
             case AREA_POISON -> spawnMonsterMist(monster);
             case REVERSE_INPUT -> disease = Disease.CONFUSE;
@@ -274,11 +274,12 @@ public class MobSkill {
     }
 
     private void applyDispelEffect(boolean skill, Monster monster, Character player) {
-        if (lt != null && rb != null && skill) {
-            getPlayersInRange(monster).forEach(Character::dispel);
-        } else {
-            player.dispel();
-        }
+        // 消除Buff的技能也先取消了
+        // if (lt != null && rb != null && skill) {
+        //     getPlayersInRange(monster).forEach(Character::dispel);
+        // } else {
+        //     player.dispel();
+        // }
     }
 
     private void applyBanishEffect(boolean skill, Monster monster, Character player,
